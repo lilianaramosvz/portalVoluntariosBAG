@@ -1,0 +1,118 @@
+// frontend/src/styles/screens/auth/LoginStyles.ts
+
+import { StyleSheet } from "react-native";
+import { Colors } from "../../colors";
+import { typography } from "../../typography";
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 25,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+    resizeMode: "contain",
+  },
+  title: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 22,
+    textAlign: "center",
+    color: Colors.text,
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    textAlign: "center",
+    color: "#666",
+    marginBottom: 25,
+  },
+  form: {
+    width: "100%",
+    backgroundColor: Colors.white,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    borderWidth: 0.1,
+    borderColor: Colors.gray,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    marginBottom: 30,
+  },
+  label: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 5,
+    color: Colors.text,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 15,
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    backgroundColor: Colors.white,
+  },
+  error: {
+    color: Colors.secondary,
+    marginBottom: 10,
+    textAlign: "left",
+    fontSize: 12,
+  },
+  forgotPassword: {
+    fontSize: 12,
+    color: "#666",
+    textDecorationLine: "underline",
+    marginBottom: 20,
+    textAlign: "left",
+  },
+  loginButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  loginText: {
+    color: Colors.white,
+    fontFamily: "Inter_500Medium",
+    fontSize: 14,
+  },
+  newVolunteer: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  registerButton: {
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    borderRadius: 50,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.white,
+    minWidth: 300,
+  },
+  registerText: {
+    color: Colors.text,
+    fontFamily: "Inter_500Medium",
+    fontSize: 14,
+  },
+});
