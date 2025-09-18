@@ -1,8 +1,10 @@
-// frontend/App.tsx
+// frontend\App.tsx
+
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import React from "react";
 import AppLoading from "expo-app-loading";
+import { NavigationContainer } from "@react-navigation/native";
 import {
   useFonts,
   Inter_400Regular,
@@ -12,6 +14,7 @@ import {
 } from "@expo-google-fonts/inter";
 
 import LoginScreen from "./src/screens/auth/LoginScreen";
+import AuthNavigator from "./src/navigation/AuthNavigator"; 
 
 export default function App() {
   //carga de las fuentes
@@ -27,10 +30,12 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <LoginScreen />
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <View style={styles.container}>
+        <AuthNavigator />
+        <StatusBar style="auto" />
+      </View>
+    </NavigationContainer>
   );
 }
 

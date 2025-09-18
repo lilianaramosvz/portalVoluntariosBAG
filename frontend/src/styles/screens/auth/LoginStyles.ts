@@ -1,4 +1,4 @@
-// frontend/src/styles/screens/auth/LoginStyles.ts
+//frontend\src\styles\screens\auth\LoginStyles.ts
 
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
     shadowColor: "#000",
-    borderWidth: 0.1,
+    borderWidth: 0.5,
     borderColor: Colors.gray,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -47,10 +47,11 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontFamily: "Inter_500Medium",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
     marginBottom: 5,
     color: Colors.text,
+    marginTop: 5,
   },
   input: {
     borderWidth: 1,
@@ -60,7 +61,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 15,
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
+    fontSize: 12,
     backgroundColor: Colors.white,
   },
   error: {
@@ -80,6 +81,8 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 12,
     borderRadius: 20,
+    borderWidth: 0.5,
+    borderColor: Colors.gray,
     alignItems: "center",
     justifyContent: "center",
     width: "100%",

@@ -1,10 +1,23 @@
-// frontend/src/screens/auth/LoginScreen.tsx
+// frontend\src\screens\auth\LoginScreen.tsx
 
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { styles } from "../../styles/screens/auth/LoginStyles";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/AuthNavigator";
+
+type LoginScreenProp = StackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC = () => {
+  const navigation = useNavigation<LoginScreenProp>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +35,6 @@ const LoginScreen: React.FC = () => {
     <View style={styles.container}>
       {/* Logo */}
       <Image source={require("../../../assets/logo.png")} style={styles.logo} />
-
 
       {/* Títulos */}
       <Text style={styles.title}>Banco de Alimentos de Guadalajara</Text>
@@ -61,7 +73,10 @@ const LoginScreen: React.FC = () => {
 
       {/* Registro */}
       <Text style={styles.newVolunteer}>¿Nuevo voluntario?</Text>
-      <TouchableOpacity style={styles.registerButton}>
+      <TouchableOpacity
+        style={styles.registerButton}
+        onPress={() => navigation.navigate("Register")}
+      >
         <Text style={styles.registerText}>Registrarse</Text>
       </TouchableOpacity>
     </View>
