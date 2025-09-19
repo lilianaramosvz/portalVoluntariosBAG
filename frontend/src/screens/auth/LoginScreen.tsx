@@ -8,7 +8,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  ActivityIndicator,
 } from "react-native";
+
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from '../../services/firebaseConfig';
+
 import { styles } from "../../styles/screens/auth/LoginStyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -18,20 +23,52 @@ type LoginScreenProp = StackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenProp>();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+
+  const auth = getAuth(app);
+
+  const handleLogin = () => { 
     if (!email || !password) {
       setError("Por favor ingresa tu correo y contraseña.");
       return;
     }
+    setLoading(true);
     setError(null);
-    alert("Login exitoso!");
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        alert("Login exitoso!");
+      })
+      .catch((e) => {
+        let errorMessage = "Ocurrió un error inesperado.";
+        switch (e.code) {
+          case "auth/user-not-found":
+          case "auth/invalid-credential":
+            errorMessage = "Correo o contraseña incorrectos.";
+            break;
+          case "auth/invalid-email":
+            errorMessage = "El formato del correo electrónico no es válido.";
+            break;
+          case "auth/network-request-failed":
+            errorMessage = "Error de red. Revisa tu conexión a internet.";
+            break;
+        }
+        setError(errorMessage);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
-  return (
+
+
+
+    return (
     <View style={styles.container}>
       {/* Logo */}
       <Image source={require("../../../assets/logo.png")} style={styles.logo} />
@@ -49,6 +86,7 @@ const LoginScreen: React.FC = () => {
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
+          autoCapitalize="none"
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -66,8 +104,16 @@ const LoginScreen: React.FC = () => {
           <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Iniciar sesión</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.loginText}>Iniciar sesión</Text>
+          )}
         </TouchableOpacity>
       </View>
 
