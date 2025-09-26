@@ -14,4 +14,12 @@ export const styles = StyleSheet.create({
     ...typography.title,
     color: Colors.primary,
   },
+  divisorline: {
+    height: 1,
+    backgroundColor: Colors.text,
+    marginVertical: 15,
+    alignSelf: "center",
+    width: "100%",
+    marginBottom: 30,
+  },
 });

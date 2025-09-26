@@ -13,13 +13,17 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 25,
   },
   containerDisplay: {
-    justifyContent: "center",
+    marginTop: 40,
     flex: 1,
   },
   adminTitle:{
-    fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    color: Colors.text,
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 22,
+    color: Colors.primary,
+    flexWrap: "wrap",
+    alignContent: "center",
+    textAlign: "center",
+    marginBottom: 50,
   },
   divisorline: {
     height: 1,

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from '../../services/firebaseConfig';
+import { app } from "../../services/firebaseConfig";
 
 import { styles } from "../../styles/screens/auth/LoginStyles";
 import { useNavigation } from "@react-navigation/native";
@@ -24,18 +24,15 @@ type LoginScreenProp = StackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenProp>();
-  
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-
   const auth = getAuth(app);
 
-  const handleLogin = () => { 
-
+  const handleLogin = () => {
     if (!email || !password) {
       setError("Por favor ingresa tu correo y contraseña.");
       return;
@@ -66,13 +63,9 @@ const LoginScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-
   };
 
-
-
-
-    return (
+  return (
     <View style={styles.container}>
       {/* Logo */}
       <Image source={require("../../../assets/logo.png")} style={styles.logo} />
@@ -118,7 +111,6 @@ const LoginScreen: React.FC = () => {
           ) : (
             <Text style={styles.loginText}>Iniciar sesión</Text>
           )}
-
         </TouchableOpacity>
       </View>
 
