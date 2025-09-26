@@ -16,15 +16,18 @@ const SolicitudesScreen: React.FC = () => {
     >
       <View style={styles.container}>
         <HeaderBack
-          title="RSolicitudes de voluntarios"
+          title="Solicitudes pendientes"
           onBack={() => navigation.goBack()}
         />
         <View style={styles.divisorline} />
-      
-        {/* Aquí irá tu contenido de solicitudes */}
-      </View>
-  </ScrollView> 
+        </View>
+
+        <View style={styles.form}>
+          <Text style={styles.subtitle}>Solicitudes pendientes de aprobación</Text>
+        </View>
+    </ScrollView>
   );
-};
+}
+
 
 export default SolicitudesScreen;

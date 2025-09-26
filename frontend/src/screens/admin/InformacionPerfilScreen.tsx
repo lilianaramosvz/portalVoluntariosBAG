@@ -1,4 +1,4 @@
-//frontend\src\screens\admin\HistorialAdminScreen.tsx
+//frontend\src\screens\admin\InformacionPerfilScreen.tsx
 
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
@@ -7,7 +7,7 @@ import { HeaderBack } from "../../components/headerTitle";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native-gesture-handler";
 
-const HistorialAdminScreen: React.FC = () => {
+const InformacionPerfil: React.FC = () => {
   const navigation = useNavigation();
 
   return (
@@ -17,15 +17,19 @@ const HistorialAdminScreen: React.FC = () => {
     >
       <View style={styles.container}>
         <HeaderBack
-          title="Historial de asistencias"
+          title="Información del perfil"
           onBack={() => navigation.goBack()}
         />
         <View style={styles.divisorline} />
+      </View>
 
-        {/* Aquí irá tu contenido de solicitudes */}
+      <View style={styles.form}>
+        <Text style={styles.subtitle}>
+          Información del perfil del voluntario
+        </Text>
       </View>
     </ScrollView>
   );
 };
 
-export default HistorialAdminScreen;
+export default InformacionPerfil;
