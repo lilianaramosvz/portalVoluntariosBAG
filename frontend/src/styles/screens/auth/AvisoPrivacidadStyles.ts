@@ -13,6 +13,9 @@ export const styles = StyleSheet.create({
     padding: 18,
     paddingBottom: 30,
   },
+  header: {
+    marginRight: 50,
+  },
   backContainer: {
     flexDirection: "row",
     alignItems: "center",
