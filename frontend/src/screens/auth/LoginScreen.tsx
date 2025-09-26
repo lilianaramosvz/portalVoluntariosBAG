@@ -11,9 +11,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from '../../services/firebaseConfig';
-
 import { styles } from "../../styles/screens/auth/LoginStyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -24,49 +21,20 @@ type LoginScreenProp = StackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenProp>();
-  
-
+  const { login, isLoading, loginError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [showValidationError, setShowValidationError] = useState(false);
 
-
-  const auth = getAuth(app);
-
-  const handleLogin = () => { 
-
-    if (!email || !password) {
-      setError("Por favor ingresa tu correo y contraseña.");
+  const handleLogin = async () => { 
+    if (!email.trim() || !password.trim()) {
+      setShowValidationError(true);
       return;
     }
-    setLoading(true);
-    setError(null);
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        alert("Login exitoso!");
-      })
-      .catch((e) => {
-        let errorMessage = "Ocurrió un error inesperado.";
-        switch (e.code) {
-          case "auth/user-not-found":
-          case "auth/invalid-credential":
-            errorMessage = "Correo o contraseña incorrectos.";
-            break;
-          case "auth/invalid-email":
-            errorMessage = "El formato del correo electrónico no es válido.";
-            break;
-          case "auth/network-request-failed":
-            errorMessage = "Error de red. Revisa tu conexión a internet.";
-            break;
-        }
-        setError(errorMessage);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-
+    
+    setShowValidationError(false);
+    await login(email, password);
+    // El AuthContext manejará automáticamente la navegación por rol y los errores
   };
 
 
@@ -102,7 +70,11 @@ const LoginScreen: React.FC = () => {
           onChangeText={setPassword}
         />
 
-        {error && <Text style={styles.error}>{error}</Text>}
+        {showValidationError && (
+          <Text style={styles.error}>Por favor ingresa tu correo y contraseña.</Text>
+        )}
+        
+        {loginError && <Text style={styles.error}>{loginError}</Text>}
 
         <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
           <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
@@ -111,16 +83,14 @@ const LoginScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.loginButton}
           onPress={handleLogin}
-          disabled={loading}
+          disabled={isLoading}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginText}>Iniciar sesión</Text>
-          )}
-
+          <Text style={styles.loginText}>
+            {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+          </Text>
         </TouchableOpacity>
       </View>
+     
 
       {/* Registro */}
       <Text style={styles.newVolunteer}>¿Nuevo voluntario?</Text>
