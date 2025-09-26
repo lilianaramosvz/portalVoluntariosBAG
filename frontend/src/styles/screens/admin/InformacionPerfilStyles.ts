@@ -1,4 +1,4 @@
-//frontend\src\styles\screens\admin\ListaVoluntariosStyles.ts
+//frontend\src\styles\screens\admin\InformacionPerfilStyles.ts
 
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
@@ -19,9 +19,9 @@ export const styles = StyleSheet.create({
     marginVertical: 15,
     alignSelf: "center",
     width: "100%",
-    marginBottom: 30,
+    marginBottom: 5,
   },
-    form: {
+  form: {
     width: "100%",
     backgroundColor: Colors.white,
     padding: 20,
