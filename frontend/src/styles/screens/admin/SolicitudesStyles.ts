@@ -5,6 +5,10 @@ import { Colors } from "../../colors";
 import { typography } from "../../typography";
 
 export const styles = StyleSheet.create({
+  scrollContainer: {
+        flex: 1,
+    backgroundColor: Colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -13,5 +17,14 @@ export const styles = StyleSheet.create({
   title: {
     ...typography.title,
     color: Colors.primary,
+  },
+  divisorline: {
+    height: 1,
+    backgroundColor: Colors.text,
+    marginVertical: 15,
+    alignSelf: "center",
+    width: "100%",
+    marginBottom: 30,
+    
   },
 });

@@ -11,6 +11,9 @@ import {
   ActivityIndicator,
 } from "react-native";
 
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from "../../services/firebaseConfig";
+
 import { styles } from "../../styles/screens/auth/LoginStyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -37,10 +40,7 @@ const LoginScreen: React.FC = () => {
     // El AuthContext manejará automáticamente la navegación por rol y los errores
   };
 
-
-
-
-    return (
+  return (
     <View style={styles.container}>
       {/* Logo */}
       <Image source={require("../../../assets/logo.png")} style={styles.logo} />
