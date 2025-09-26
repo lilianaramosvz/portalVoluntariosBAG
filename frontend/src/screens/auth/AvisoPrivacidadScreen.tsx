@@ -1,9 +1,11 @@
 //frontend\src\screens\auth\AvisoPrivacidadScreen.tsx
+
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { styles } from "../../styles/screens/auth/AvisoPrivacidadStyles";
+import { HeaderBack } from "../../components/headerTitle";
 
 const AvisoPrivacidadScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -14,14 +16,9 @@ const AvisoPrivacidadScreen: React.FC = () => {
       contentContainerStyle={styles.container}
     >
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backContainer}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-          <Text style={styles.title}>Aviso de privacidad</Text>
-        </TouchableOpacity>
-
+        <View style={styles.header}>
+          <HeaderBack title="Aviso de privacidad" onBack={() => navigation.goBack()} />
+        </View>
         <View style={styles.divisorline} />
 
         <View style={styles.form}>

@@ -1,4 +1,4 @@
-// frontend\App.tsx
+//frontend\App.tsx
 
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Image } from "react-native";
@@ -15,7 +15,9 @@ import {
 
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import AuthNavigator from "./src/navigation/AuthNavigator";
+import AppNavigator from "./src/AppNavigator";
 import { useEffect } from "react";
+import { AuthProvider } from "./src/context/AuthContext";
 
 export default function App() {
   //carga de las fuentes
@@ -50,12 +52,14 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <View style={styles.container}>
-        <AuthNavigator />
-        <StatusBar style="auto" />
-      </View>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <View style={styles.container}>
+          <AppNavigator />
+          <StatusBar style="auto" />
+        </View>
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 
