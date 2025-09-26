@@ -13,22 +13,26 @@ import { styles } from "../../styles/screens/auth/LoginStyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
+import { useAuth } from "../../context/AuthContext";
 
 type LoginScreenProp = StackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenProp>();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError("Por favor ingresa tu correo y contraseña.");
       return;
     }
-    setError(null);
-    alert("Login exitoso!");
+    const success = await login(email, password);
+    if (!success) {
+      setError("Credenciales incorrectas.");
+    }
   };
 
   return (
@@ -66,8 +70,14 @@ const LoginScreen: React.FC = () => {
           <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Iniciar sesión</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.loginText}>
+            {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+          </Text>
         </TouchableOpacity>
       </View>
 
