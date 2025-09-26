@@ -71,7 +71,9 @@ const RegisterScreen: React.FC = () => {
     !birthDate ||
     !emergencyContact ||
     !gender ||
-    !business
+    !business ||
+    !ineFile ||         
+  !addressFile 
   ) {
     alert("Por favor, completa todos los campos con *.");
     return;
@@ -243,7 +245,7 @@ const RegisterScreen: React.FC = () => {
           <Text style={styles.subtitle}>Documentos requeridos</Text>
 
           {/* Identificación oficial */}
-          <Text style={styles.label}>Identificación oficial (INE)</Text>
+          <Text style={styles.label}>Identificación oficial (INE) *</Text>
           <TouchableOpacity style={styles.input} onPress={pickIneFile}>
             <Text style={styles.uploadButtonText}>
               {ineFile ? `✅ ${ineFile}` : "📎   Subir archivo INE"}
