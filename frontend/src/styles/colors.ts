@@ -1,7 +1,7 @@
 // src/styles/colors.ts
 
 export const Colors = {
-  primary: "#14AE5C",
+  primary: "#009951",
   secondary: "#FF383C",
   tertiary: "#FFF5D9",
   background: "#FEFFF6",

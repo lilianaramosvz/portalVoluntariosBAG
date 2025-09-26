@@ -15,6 +15,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
+import { HeaderBack } from "../../components/headerTitle";
 
 type RegisterScreenProp = StackNavigationProp<RootStackParamList, "Register">;
 
@@ -99,14 +100,10 @@ const RegisterScreen: React.FC = () => {
       contentContainerStyle={styles.container}
     >
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backContainer}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-          <Text style={styles.title}>Registro de voluntarios</Text>
-        </TouchableOpacity>
-
+        <HeaderBack
+          title="Registro de voluntarios"
+          onBack={() => navigation.goBack()}
+        />
         <View style={styles.divisorline} />
 
         <View style={styles.form}>

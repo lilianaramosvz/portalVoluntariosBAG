@@ -1,8 +1,8 @@
-// frontend\App.tsx
+//frontend\App.tsx
 
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
-import React from "react";
+import { StyleSheet, View, Image } from "react-native";
+import React, { useState } from "react";
 import AppLoading from "expo-app-loading";
 import { NavigationContainer } from "@react-navigation/native";
 import {
@@ -14,7 +14,10 @@ import {
 } from "@expo-google-fonts/inter";
 
 import LoginScreen from "./src/screens/auth/LoginScreen";
-import AuthNavigator from "./src/navigation/AuthNavigator"; 
+import AuthNavigator from "./src/navigation/AuthNavigator";
+import AppNavigator from "./src/AppNavigator";
+import { useEffect } from "react";
+import { AuthProvider } from "./src/context/AuthContext";
 
 export default function App() {
   //carga de las fuentes
@@ -25,17 +28,38 @@ export default function App() {
     Inter_700Bold,
   });
 
-  if (!fontsLoaded) {
-    return <AppLoading />; //pantalla de carga hasta que las fuentes estén listas
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+      }, 1000); // 1 segundo extra
+      return () => clearTimeout(timer);
+    }
+  }, [fontsLoaded]);
+
+  if (showSplash) {
+    return (
+      <View style={styles.splashContainer}>
+        <Image
+          source={require("./assets/Loading.jpg")}
+          style={styles.splashImage}
+          resizeMode="contain"
+        />
+      </View>
+    );
   }
 
   return (
-    <NavigationContainer>
-      <View style={styles.container}>
-        <AuthNavigator />
-        <StatusBar style="auto" />
-      </View>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <View style={styles.container}>
+          <AppNavigator />
+          <StatusBar style="auto" />
+        </View>
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 
@@ -43,5 +67,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  splashContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  splashImage: {
+    width: "100%",
+    height: "100%",
   },
 });
