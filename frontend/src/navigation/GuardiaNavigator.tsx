@@ -1,16 +1,28 @@
 //frontend\src\navigation\GuardiaNavigator.tsx
 
-import { createStackNavigator } from '@react-navigation/stack';
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import DashboardGuardiaScreen from "../screens/guardia/DashboardGuardiaScreen";
 
-const Stack = createStackNavigator();
+export type GuardiaStackParamList = {
+  DashboardGuardia: undefined;
+  QRScanner: undefined;
+};
+
+const Stack = createStackNavigator<GuardiaStackParamList>();
 
 const GuardiaNavigator = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      initialRouteName="DashboardGuardia"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen
-        name="Home"
-        component={() => null}
-        options={{ title: 'Home' }}
+        name="DashboardGuardia"
+        component={DashboardGuardiaScreen}
+        options={{ title: "Dashboard Guardia" }}
       />
     </Stack.Navigator>
   );

@@ -21,7 +21,7 @@ export const HeaderLogout: React.FC<HeaderLogoutProps> = ({ title, onLogout }) =
     <View style={styles.headerRow}>
       <Text style={styles.title}>{title}</Text>
       <TouchableOpacity onPress={onLogout} style={styles.actionButton}>
-        <MaterialIcons name="logout" size={25} color="black" style={{ paddingTop: 20 }} />
+        <MaterialIcons name="logout" size={25} color={Colors.gray} style={{ paddingTop: 20 }} />
       </TouchableOpacity>
     </View>
   );
