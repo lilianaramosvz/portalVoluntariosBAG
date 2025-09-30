@@ -12,6 +12,7 @@ interface User {
   email: string;
   name: string;
   role: UserRole;
+  isActive?: boolean;
 }
 
 interface AuthContextType {
@@ -43,7 +44,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               id: userData.id,
               email: userData.email,
               name: userData.name,
-              role: userData.rol
+              role: userData.rol,
+              isActive: userData.isActive || true
             });
           } else {
             console.error('No se pudieron obtener los datos del usuario');
@@ -79,7 +81,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           id: userData.id,
           email: userData.email,
           name: userData.name,
-          role: userData.rol
+          role: userData.rol,
+          isActive: userData.isActive || false
         });
         return true;
       } else {
