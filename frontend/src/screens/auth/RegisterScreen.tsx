@@ -15,7 +15,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
-import  {app}  from "../../services/firebaseConfig";
+import { app } from "../../services/firebaseConfig";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
@@ -41,7 +41,9 @@ const RegisterScreen: React.FC = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const navigation = useNavigation<RegisterScreenProp>();
   const [ineFile, setIneFile] = useState<DocumentPickerAsset | null>(null);
-  const [addressFile, setAddressFile] = useState<DocumentPickerAsset | null>(null);
+  const [addressFile, setAddressFile] = useState<DocumentPickerAsset | null>(
+    null
+  );
 
   const pickIneFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -62,83 +64,116 @@ const RegisterScreen: React.FC = () => {
   };
 
   const handleRegister = async () => {
-  if (
-    !email ||
-    !password ||
-    !confirmPassword ||
-    !name ||
-    !curp ||
-    !ine || 
-    !birthDate ||
-    !emergencyContact ||
-    !gender ||
-    !business ||
-    !ineFile ||         
-  !addressFile 
-  ) {
-    alert("Por favor, completa todos los campos con *.");
-    return;
-  }
-  
-  if (password !== confirmPassword) {
-    alert("Las contraseñas no coinciden.");
-    return;
-  }
+    if (
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !name ||
+      !curp ||
+      !ine ||
+      !birthDate ||
+      !emergencyContact ||
+      !gender ||
+      !business ||
+      !ineFile ||
+      !addressFile
+    ) {
+      alert("Por favor, completa todos los campos con *.");
+      return;
+    }
 
-  try {
+    if (password !== confirmPassword) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
 
-
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("Usuario creado con UID:", user.uid);
-
-    const uploadFile = async (file: DocumentPickerAsset | null, fileName: string) => {
-      if (!file) return null;
-
-      const response = await fetch(file.uri);
-      const blob = await response.blob();
-      const storageRef = ref(storage, `usuarios/${user.uid}/${fileName}`);
-      const snapshot = await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      return downloadURL;
+    const newUser = {
+      name,
+      email,
+      password,
+      curp,
+      ine,
+      birthDate,
+      emergencyContact,
+      gender,
+      discapacity,
+      business,
+      isActive: false, // ← Debe estar en false por defecto
+      rol: "voluntario",
     };
 
-    const ineFileUrl = await uploadFile(ineFile, "ine" + (ineFile ? ineFile.name.substring(ineFile.name.lastIndexOf('.')) : ''));
-    const addressFileUrl = await uploadFile(addressFile, "comprobante" + (addressFile ? addressFile.name.substring(addressFile.name.lastIndexOf('.')) : ''));
-    console.log("Archivos procesados. Si no se seleccionaron, las URLs serán nulas.");
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      console.log("Usuario creado con UID:", user.uid);
 
-    await setDoc(doc(db, "Usuarios", user.uid), {
-      nombre: name,
-      curp: curp,
-      email: email,
-      numeroIne: ine,
-      fechaNacimiento: birthDate,
-      contactoEmergencia: emergencyContact,
-      genero: gender,
-      discapacidad: discapacity,
-      empresa: business,
-      rol: "voluntario",
-      fechaRegistro: new Date(),
-      documentos: {
-        ine: ineFileUrl, 
-        comprobanteDomicilio: addressFileUrl, 
-      },
-    });
-    console.log("Datos del usuario guardados en Firestore.");
+      const uploadFile = async (
+        file: DocumentPickerAsset | null,
+        fileName: string
+      ) => {
+        if (!file) return null;
 
-    alert("¡Registro completado con éxito!");
-    navigation.navigate("Login");
+        const response = await fetch(file.uri);
+        const blob = await response.blob();
+        const storageRef = ref(storage, `usuarios/${user.uid}/${fileName}`);
+        const snapshot = await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+      };
 
-  } catch (error: any) {
-    console.error("Error en el registro:", error);
-    // Mejora del mensaje de error para problemas de Storage
-    if (error.code === 'storage/unauthorized') {
-        alert("Error de permisos al subir archivos. Tu cuenta puede no estar verificada aún. El usuario fue creado, pero los archivos no se subieron.");
-    } else {
+      const ineFileUrl = await uploadFile(
+        ineFile,
+        "ine" +
+          (ineFile ? ineFile.name.substring(ineFile.name.lastIndexOf(".")) : "")
+      );
+      const addressFileUrl = await uploadFile(
+        addressFile,
+        "comprobante" +
+          (addressFile
+            ? addressFile.name.substring(addressFile.name.lastIndexOf("."))
+            : "")
+      );
+      console.log(
+        "Archivos procesados. Si no se seleccionaron, las URLs serán nulas."
+      );
+
+      await setDoc(doc(db, "Usuarios", user.uid), {
+        nombre: name,
+        curp: curp,
+        email: email,
+        numeroIne: ine,
+        fechaNacimiento: birthDate,
+        contactoEmergencia: emergencyContact,
+        genero: gender,
+        discapacidad: discapacity,
+        empresa: business,
+        rol: "voluntario",
+        fechaRegistro: new Date(),
+        documentos: {
+          ine: ineFileUrl,
+          comprobanteDomicilio: addressFileUrl,
+        },
+      });
+      console.log("Datos del usuario guardados en Firestore.");
+
+      alert("¡Registro completado con éxito!");
+      navigation.navigate("Login");
+    } catch (error: any) {
+      console.error("Error en el registro:", error);
+      // Mejora del mensaje de error para problemas de Storage
+      if (error.code === "storage/unauthorized") {
+        alert(
+          "Error de permisos al subir archivos. Tu cuenta puede no estar verificada aún. El usuario fue creado, pero los archivos no se subieron."
+        );
+      } else {
         alert(`Ocurrió un error: ${error.message}`);
+      }
     }
-  }
-};
+  };
 
   return (
     <ScrollView
