@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               role: userData.rol
             });
           } else {
-            console.error('No se pudieron obtener los datos del usuario');
+            //console.error('No se pudieron obtener los datos del usuario');
             setUser(null);
           }
         } catch (error) {

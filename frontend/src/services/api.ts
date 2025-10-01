@@ -30,10 +30,10 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
     console.log(`=== INICIO getUserData ===`);
     console.log(`UID recibido: "${uid}"`);
     console.log(`Email recibido: "${userEmail}"`);
-    console.log(`Buscando en colección: "users"`);
+    console.log(`Buscando en colección: "Usuarios"`); // Cambiado de "users" a "Usuarios"
     console.log(`Documento ID: "${uid}"`);
     
-    // Intentar obtener el documento del usuario
+    // Intentar obtener el documento del usuario - CORREGIDO: usar "Usuarios" en lugar de "users"
     const docRef = doc(db, 'Usuarios', uid);
     console.log('Referencia del documento creada:', docRef.path);
     
@@ -73,7 +73,7 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
       return userData;
     } else {
       console.log('=== DOCUMENTO NO ENCONTRADO ===');
-      console.log(`No se encontró documento con ID: "${uid}" en la colección "users"`);
+      console.log(`No se encontró documento con ID: "${uid}" en la colección "Usuarios"`); // Cambiado de "users"
       
       // Intentar listar algunos documentos para debug
       console.log('Verificando conexión a Firestore...');
@@ -91,7 +91,7 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
 // Función para actualizar el rol de un usuario (por si la necesitas más adelante)
 export const updateUserRole = async (uid: string, newRole: 'voluntario' | 'admin' | 'guardia' | 'superadmin'): Promise<void> => {
   try {
-    await setDoc(doc(db, 'Usuarios', uid), { rol: newRole }, { merge: true });
+    await setDoc(doc(db, 'Usuarios', uid), { rol: newRole }, { merge: true }); // Cambiado de "users" a "Usuarios"
     console.log(`Rol actualizado para usuario ${uid}: ${newRole}`);
   } catch (error) {
     console.error('Error actualizando rol del usuario:', error);
