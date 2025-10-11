@@ -12,6 +12,7 @@ export interface UserData {
   rol: 'voluntario' | 'admin' | 'guardia' | 'superadmin';
   // Campos opcionales para voluntarios
   contactoEmergencia?: string;
+  isActive?: boolean;
   curp?: string;
   discapacidad?: string;
   documentos?: {

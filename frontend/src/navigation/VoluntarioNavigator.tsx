@@ -1,16 +1,29 @@
 //frontend\src\navigation\VoluntarioNavigator.tsx
 
-import { createStackNavigator } from '@react-navigation/stack';
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import DashboardScreen from "../screens/voluntario/DashboardScreen";
 
-const Stack = createStackNavigator();
+export type VoluntarioStackParamList = {
+  Dashboard: undefined;
+  QRGenerator: undefined;
+  HistorialAsistencias: undefined;
+};
+
+const Stack = createStackNavigator<VoluntarioStackParamList>();
 
 const VoluntarioNavigator = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      initialRouteName="Dashboard"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen
-        name="Home"
-        component={() => null}
-        options={{ title: 'Home' }}
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{ title: "Dashboard" }}
       />
     </Stack.Navigator>
   );

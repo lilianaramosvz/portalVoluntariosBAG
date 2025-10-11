@@ -18,6 +18,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
 import { app } from "../../services/firebaseConfig";
 import { createUserWithEmailAndPassword, getAuth, fetchSignInMethodsForEmail, signOut } from "firebase/auth";
+
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
 import { DocumentPickerAsset } from "expo-document-picker";
@@ -119,6 +120,7 @@ const RegisterScreen: React.FC = () => {
     setShowGenderPicker(false);
   };
 
+
   const pickIneFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: ["application/pdf", "image/*"],
@@ -157,6 +159,7 @@ const RegisterScreen: React.FC = () => {
       return;
     }
     
+
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden.");
       return;
@@ -269,6 +272,7 @@ const RegisterScreen: React.FC = () => {
       </View>
     );
   }
+
 
   return (
     <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
