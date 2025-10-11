@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               isActive: userData.isActive || true
             });
           } else {
-            console.error('No se pudieron obtener los datos del usuario');
+            //console.error('No se pudieron obtener los datos del usuario');
             setUser(null);
           }
         } catch (error) {
