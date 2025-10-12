@@ -75,6 +75,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
     width: "100%",
+    elevation: 3,
   },
   buttonText: {
     fontFamily: "Inter_500Medium",

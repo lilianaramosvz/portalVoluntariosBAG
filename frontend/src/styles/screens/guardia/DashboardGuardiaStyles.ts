@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 5,
     marginTop: 10,
-    elevation: 3,
+    elevation: 1,
   },
   instructionsTitle: {
     fontFamily: "Inter_500Medium",
