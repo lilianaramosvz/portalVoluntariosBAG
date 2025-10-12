@@ -1,4 +1,4 @@
-//frontend\src\screens\admin\ListaVoluntariosScreen.tsx
+// frontend/src/screens/admin/ListaVoluntariosScreen.tsx
 
 import React, { useState, useEffect } from "react";
 import {
@@ -13,7 +13,14 @@ import {
   Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { collection, getDocs, doc, getDoc, getFirestore } from "firebase/firestore";
+import { Colors } from "../../styles/colors";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  getFirestore,
+} from "firebase/firestore";
 import { app } from "../../services/firebaseConfig";
 import { styles } from "../../styles/screens/admin/ListaVoluntariosStyles";
 import { HeaderBack } from "../../components/headerTitle";
@@ -27,7 +34,7 @@ interface Voluntario {
   email: string;
   curp: string;
   numeroIne?: string;
-  fechaNacimiento?: string;
+  fechaNacimiento?: any;
   contactoEmergencia?: string;
   genero?: string;
   discapacidad?: string;
@@ -39,13 +46,13 @@ interface Voluntario {
     ine?: string;
     comprobanteDomicilio?: string;
   };
-  [key: string]: any;
 }
 
 const ListaVoluntariosScreen: React.FC = () => {
   const navigation = useNavigation();
   const [voluntarios, setVoluntarios] = useState<Voluntario[]>([]);
-  const [selectedVoluntario, setSelectedVoluntario] = useState<Voluntario | null>(null);
+  const [selectedVoluntario, setSelectedVoluntario] =
+    useState<Voluntario | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
@@ -61,8 +68,6 @@ const ListaVoluntariosScreen: React.FC = () => {
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        
-        // Filter for volunteers using both possible field names
         if (data.rol === "voluntario" || data.role === "voluntario") {
           voluntariosData.push({
             id: doc.id,
@@ -71,11 +76,14 @@ const ListaVoluntariosScreen: React.FC = () => {
         }
       });
 
-      // Sort by registration date (most recent first)
       voluntariosData.sort((a, b) => {
         if (a.fechaRegistro && b.fechaRegistro) {
-          const dateA = a.fechaRegistro.toDate ? a.fechaRegistro.toDate() : new Date(a.fechaRegistro);
-          const dateB = b.fechaRegistro.toDate ? b.fechaRegistro.toDate() : new Date(b.fechaRegistro);
+          const dateA = a.fechaRegistro.toDate
+            ? a.fechaRegistro.toDate()
+            : new Date(a.fechaRegistro);
+          const dateB = b.fechaRegistro.toDate
+            ? b.fechaRegistro.toDate()
+            : new Date(b.fechaRegistro);
           return dateB.getTime() - dateA.getTime();
         }
         return 0;
@@ -119,60 +127,45 @@ const ListaVoluntariosScreen: React.FC = () => {
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "No disponible";
-    
     try {
-      if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+      if (timestamp.toDate && typeof timestamp.toDate === "function") {
         return timestamp.toDate().toLocaleDateString("es-MX");
       }
       if (timestamp instanceof Date) {
         return timestamp.toLocaleDateString("es-MX");
       }
-      if (typeof timestamp === 'string') {
+      if (typeof timestamp === "string") {
         return timestamp;
       }
       return "No disponible";
-    } catch (error) {
+    } catch {
       return "No disponible";
     }
   };
 
-  const renderField = (label: string, value: any) => (
-    <View style={{ marginBottom: 12 }}>
-      <Text style={{ fontWeight: "600", fontSize: 14, color: "#333" }}>
-        {label}:
-      </Text>
-      <Text style={{ fontSize: 14, color: "#666", marginTop: 2 }}>
-        {value || "No disponible"}
-      </Text>
-    </View>
-  );
-
-  const openDocument = async (documentUrl: string, documentName: string) => {
+  const openDocument = async (url?: string) => {
+    if (!url) {
+      Alert.alert("Error", "No hay URL de documento disponible");
+      return;
+    }
     try {
-      if (!documentUrl) {
-        Alert.alert("Error", "No hay URL de documento disponible");
-        return;
-      }
-
-      const supported = await Linking.canOpenURL(documentUrl);
+      const supported = await Linking.canOpenURL(url);
       if (supported) {
-        await Linking.openURL(documentUrl);
+        await Linking.openURL(url);
       } else {
         Alert.alert("Error", "No se puede abrir este tipo de documento");
       }
     } catch (error) {
-      console.error("Error opening document:", error);
+      console.error(error);
       Alert.alert("Error", "No se pudo abrir el documento");
     }
   };
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <ActivityIndicator size="large" color="#009951" />
-        <Text style={{ marginTop: 10, fontSize: 16, color: "#666" }}>
-          Cargando voluntarios...
-        </Text>
+      <View style={[styles.container, styles.centeredContainer]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.emptyText}>Cargando voluntarios...</Text>
       </View>
     );
   }
@@ -186,151 +179,176 @@ const ListaVoluntariosScreen: React.FC = () => {
       <View style={styles.divisorline} />
 
       {voluntarios.length === 0 ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Ionicons name="people-outline" size={60} color="#ccc" />
-          <Text style={{ fontSize: 16, color: "#666", marginTop: 10 }}>
-            No hay voluntarios registrados
-          </Text>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="people-outline" size={60} color={Colors.gray} />
+          <Text style={styles.emptyText}>No hay voluntarios registrados</Text>
         </View>
       ) : (
-        <FlatList
-          data={voluntarios}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.form}
-              onPress={() => handleVoluntarioPress(item)}
-              activeOpacity={0.7}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <View style={{ marginRight: 15 }}>
-                  <Ionicons name="person-circle" size={40} color="#009951" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.subtitle, { fontSize: 16, marginBottom: 3 }]}>
-                    {item.nombre}
-                  </Text>
-                  <Text style={{ fontSize: 14, color: "#666", marginBottom: 2 }}>
-                    {item.email}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: "#999" }}>
-                    CURP: {item.curp}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#ccc" />
-              </View>
-            </TouchableOpacity>
-          )}
-          refreshing={loading}
-          onRefresh={fetchVoluntarios}
+        <ScrollView
           showsVerticalScrollIndicator={false}
-        />
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
+          <View style={styles.mainCard}>
+            <Text style={styles.mainCardTitle}>
+              Lista de voluntarios registrados
+            </Text>
+
+            <FlatList
+              data={voluntarios}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.form}
+                  onPress={() => handleVoluntarioPress(item)}
+                  activeOpacity={0.7}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Ionicons
+                      name="person-circle"
+                      size={40}
+                      color={Colors.purple}
+                      style={{ marginRight: 10, marginLeft: -5 }}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={styles.nombreText}
+                        ellipsizeMode="tail"
+                        numberOfLines={2}
+                      >
+                        {item.nombre}
+                      </Text>
+                      <Text style={styles.emailText}>{item.email}</Text>
+                      <Text style={styles.curpText}>CURP: {item.curp}</Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={Colors.gray}
+                      marginLeft={10}
+                    />
+                  </View>
+                </TouchableOpacity>
+              )}
+              refreshing={loading}
+              onRefresh={fetchVoluntarios}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </ScrollView>
       )}
 
-      {/* Modal para mostrar detalles */}
+      {/* Modal con detalles del voluntario */}
       <Modal
         visible={!!selectedVoluntario}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setSelectedVoluntario(null)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          justifyContent: "center",
-          alignItems: "center",
-        }}>
-          <View style={{
-            backgroundColor: "white",
-            margin: 20,
-            borderRadius: 16,
-            padding: 20,
-            maxHeight: "80%",
-            width: "90%",
-          }}>
-            <View style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 20,
-            }}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeaderRow}>
               <Text style={[styles.subtitle, { fontSize: 18 }]}>
                 Detalles del Voluntario
               </Text>
               <TouchableOpacity
                 onPress={() => setSelectedVoluntario(null)}
-                style={{ padding: 5 }}
+                style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color={Colors.gray} />
               </TouchableOpacity>
             </View>
 
             {loadingDetails ? (
-              <View style={{ alignItems: "center", padding: 20 }}>
-                <ActivityIndicator size="large" color="#009951" />
-                <Text style={{ marginTop: 10, color: "#666" }}>
+              <View style={styles.loadingDetails}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+                <Text style={styles.modalLoadingText}>
                   Cargando detalles...
                 </Text>
               </View>
             ) : (
               <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={{ marginBottom: 20 }}>
-                  <Text style={[styles.subtitle, { marginBottom: 15 }]}>
-                    Información Personal
-                  </Text>
-
-                  {renderField("Nombre completo", selectedVoluntario?.nombre)}
-                  {renderField("Correo electrónico", selectedVoluntario?.email)}
-                  {renderField("CURP", selectedVoluntario?.curp)}
-                  {renderField("Número de INE", selectedVoluntario?.numeroIne)}
-                  {renderField("Fecha de nacimiento", selectedVoluntario?.fechaNacimiento)}
-                  {renderField("Género", selectedVoluntario?.genero)}
-                  {renderField("Contacto de emergencia", selectedVoluntario?.contactoEmergencia)}
-                  {renderField("Discapacidad", selectedVoluntario?.discapacidad)}
-                  {renderField("Empresa", selectedVoluntario?.empresa)}
-                  {renderField("Fecha de registro", formatDate(selectedVoluntario?.fechaRegistro))}
+                <View style={{ marginBottom: 5 }}>
+                  {[
+                    ["Nombre completo", selectedVoluntario?.nombre],
+                    ["Correo electrónico", selectedVoluntario?.email],
+                    ["CURP", selectedVoluntario?.curp],
+                    ["Número de INE", selectedVoluntario?.numeroIne],
+                    [
+                      "Fecha de nacimiento",
+                      formatDate(selectedVoluntario?.fechaNacimiento),
+                    ],
+                    ["Género", selectedVoluntario?.genero],
+                    [
+                      "Contacto de emergencia",
+                      selectedVoluntario?.contactoEmergencia,
+                    ],
+                    ["Discapacidad", selectedVoluntario?.discapacidad],
+                    ["Empresa", selectedVoluntario?.empresa],
+                    [
+                      "Fecha de registro",
+                      formatDate(selectedVoluntario?.fechaRegistro),
+                    ],
+                  ].map(([label, value]) => (
+                    <View key={label} style={styles.fieldRow}>
+                      <Text style={styles.fieldLabel}>{label}:</Text>
+                      <Text style={styles.fieldValue}>
+                        {value || "No disponible"}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
 
-                {(selectedVoluntario?.documentos?.ine || selectedVoluntario?.documentos?.comprobanteDomicilio) && (
+                {(selectedVoluntario?.documentos?.ine ||
+                  selectedVoluntario?.documentos?.comprobanteDomicilio) && (
                   <View>
-                    <Text style={[styles.subtitle, { marginBottom: 15 }]}>
-                      Documentos
+                    <Text style={[styles.subtitle, { marginBottom: 5 }]}>
+                      Documentos:
                     </Text>
                     {selectedVoluntario?.documentos?.ine && (
-                      <TouchableOpacity 
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          padding: 10,
-                          backgroundColor: "#f5f5f5",
-                          borderRadius: 8,
-                          marginBottom: 8,
-                        }}
-                        onPress={() => openDocument(selectedVoluntario.documentos?.ine!, "INE")}
+                      <TouchableOpacity
+                        style={styles.documentRow}
+                        onPress={() =>
+                          openDocument(selectedVoluntario.documentos?.ine)
+                        }
                       >
-                        <Ionicons name="document-attach" size={20} color="#009951" />
-                        <Text style={{ marginLeft: 10, flex: 1 }}>
+                        <Ionicons
+                          name="document-attach"
+                          size={20}
+                          color={Colors.primary}
+                        />
+                        <Text style={styles.imageFont}>
                           Identificación oficial (INE)
                         </Text>
-                        <Ionicons name="eye-outline" size={18} color="#666" />
+                        <Ionicons
+                          name="eye-outline"
+                          size={18}
+                          color={Colors.gray}
+                        />
                       </TouchableOpacity>
                     )}
                     {selectedVoluntario?.documentos?.comprobanteDomicilio && (
-                      <TouchableOpacity 
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          padding: 10,
-                          backgroundColor: "#f5f5f5",
-                          borderRadius: 8,
-                        }}
-                        onPress={() => openDocument(selectedVoluntario.documentos?.comprobanteDomicilio!, "Comprobante de domicilio")}
+                      <TouchableOpacity
+                        style={styles.documentRowNoMargin}
+                        onPress={() =>
+                          openDocument(
+                            selectedVoluntario.documentos?.comprobanteDomicilio
+                          )
+                        }
                       >
-                        <Ionicons name="document-attach" size={20} color="#009951" />
-                        <Text style={{ marginLeft: 10, flex: 1 }}>
+                        <Ionicons
+                          name="document-attach"
+                          size={20}
+                          color={Colors.primary}
+                        />
+                        <Text style={styles.imageFont}>
                           Comprobante de domicilio
                         </Text>
-                        <Ionicons name="eye-outline" size={18} color="#666" />
+                        <Ionicons
+                          name="eye-outline"
+                          size={18}
+                          color={Colors.gray}
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
