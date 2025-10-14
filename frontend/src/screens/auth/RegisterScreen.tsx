@@ -17,12 +17,18 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
 import { app } from "../../services/firebaseConfig";
-import { createUserWithEmailAndPassword, getAuth, fetchSignInMethodsForEmail, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  fetchSignInMethodsForEmail,
+  signOut,
+} from "firebase/auth";
 
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { doc, getFirestore, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
 import { DocumentPickerAsset } from "expo-document-picker";
 import { HeaderBack } from "../../components/headerTitle";
+
 
 type RegisterScreenProp = StackNavigationProp<RootStackParamList, "Register">;
 const auth = getAuth(app);
@@ -43,24 +49,28 @@ const RegisterScreen: React.FC = () => {
   const [business, setBusiness] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [ineFile, setIneFile] = useState<DocumentPickerAsset | null>(null);
-  const [addressFile, setAddressFile] = useState<DocumentPickerAsset | null>(null);
+  const [addressFile, setAddressFile] = useState<DocumentPickerAsset | null>(
+    null
+  );
   const [isRegistering, setIsRegistering] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
-  
+
   const navigation = useNavigation<RegisterScreenProp>();
 
   const validateDate = (dateString: string): boolean => {
     const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
     if (!dateRegex.test(dateString)) return false;
-    
+
     const [, day, month, year] = dateString.match(dateRegex) || [];
     const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    
-    return date.getFullYear() == parseInt(year) && 
-           date.getMonth() == parseInt(month) - 1 && 
-           date.getDate() == parseInt(day) &&
-           parseInt(year) >= 1900 &&
-           parseInt(year) <= new Date().getFullYear() - 18;
+
+    return (
+      date.getFullYear() == parseInt(year) &&
+      date.getMonth() == parseInt(month) - 1 &&
+      date.getDate() == parseInt(day) &&
+      parseInt(year) >= 1900 &&
+      parseInt(year) <= new Date().getFullYear() - 18
+    );
   };
 
   const validateCURP = (curp: string): boolean => {
@@ -74,29 +84,32 @@ const RegisterScreen: React.FC = () => {
 
   const formatCURP = (text: string) => {
     // Convert to uppercase and remove non-alphanumeric characters
-    const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    
+    const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
     // Limit to 18 characters (CURP length)
     return cleaned.slice(0, 18);
   };
 
   const formatINE = (text: string) => {
     // Remove non-numeric characters
-    const cleaned = text.replace(/\D/g, '');
-    
+    const cleaned = text.replace(/\D/g, "");
+
     // Limit to 13 digits
     return cleaned.slice(0, 13);
   };
 
   const formatDate = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    
+    const cleaned = text.replace(/\D/g, "");
+
     if (cleaned.length <= 2) {
       return cleaned;
     } else if (cleaned.length <= 4) {
       return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
     } else {
-      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(
+        4,
+        8
+      )}`;
     }
   };
 
@@ -119,7 +132,6 @@ const RegisterScreen: React.FC = () => {
     setGender(selectedGender);
     setShowGenderPicker(false);
   };
-
 
   const pickIneFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -146,19 +158,20 @@ const RegisterScreen: React.FC = () => {
       !confirmPassword ||
       !name ||
       !curp ||
-      !ine || 
+      !ine ||
       !birthDate ||
       !emergencyContact ||
       !gender ||
       !business ||
-      !ineFile ||         
+      !ineFile ||
       !addressFile ||
       !acceptTerms
     ) {
-      alert("Por favor, completa todos los campos con * y acepta el aviso de privacidad.");
+      alert(
+        "Por favor, completa todos los campos con * y acepta el aviso de privacidad."
+      );
       return;
     }
-    
 
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden.");
@@ -166,12 +179,16 @@ const RegisterScreen: React.FC = () => {
     }
 
     if (!validateDate(birthDate)) {
-      alert("Por favor ingresa una fecha de nacimiento válida (DD/MM/AAAA) y que tengas al menos 18 años.");
+      alert(
+        "Por favor ingresa una fecha de nacimiento válida (DD/MM/AAAA) y que tengas al menos 18 años."
+      );
       return;
     }
 
     if (!validateCURP(curp)) {
-      alert("Por favor ingresa un CURP válido (18 caracteres: 4 letras, 6 números, H/M, 5 letras, 2 números)");
+      alert(
+        "Por favor ingresa un CURP válido (18 caracteres: 4 letras, 6 números, H/M, 5 letras, 2 números)"
+      );
       return;
     }
 
@@ -186,16 +203,25 @@ const RegisterScreen: React.FC = () => {
       // Verificar si el email ya existe
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
       if (signInMethods.length > 0) {
-        alert("Este correo electrónico ya está registrado. Usa otro correo o inicia sesión.");
+        alert(
+          "Este correo electrónico ya está registrado. Usa otro correo o inicia sesión."
+        );
         return;
       }
 
       // Crear la cuenta
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
       // Subir archivos
-      const uploadFile = async (file: DocumentPickerAsset | null, fileName: string) => {
+      const uploadFile = async (
+        file: DocumentPickerAsset | null,
+        fileName: string
+      ) => {
         if (!file) return null;
 
         const response = await fetch(file.uri);
@@ -206,11 +232,21 @@ const RegisterScreen: React.FC = () => {
         return downloadURL;
       };
 
-      const ineFileUrl = await uploadFile(ineFile, "ine" + (ineFile ? ineFile.name.substring(ineFile.name.lastIndexOf('.')) : ''));
-      const addressFileUrl = await uploadFile(addressFile, "comprobante" + (addressFile ? addressFile.name.substring(addressFile.name.lastIndexOf('.')) : ''));
+      const ineFileUrl = await uploadFile(
+        ineFile,
+        "ine" +
+          (ineFile ? ineFile.name.substring(ineFile.name.lastIndexOf(".")) : "")
+      );
+      const addressFileUrl = await uploadFile(
+        addressFile,
+        "comprobante" +
+          (addressFile
+            ? addressFile.name.substring(addressFile.name.lastIndexOf("."))
+            : "")
+      );
 
       // Guardar datos en Firestore
-      await setDoc(doc(db, "Usuarios", user.uid), {
+      await setDoc(doc(db, "voluntariosPendientes", user.uid), {
         nombre: name,
         curp: curp,
         email: email,
@@ -221,10 +257,11 @@ const RegisterScreen: React.FC = () => {
         discapacidad: discapacity,
         empresa: business,
         rol: "voluntario",
+        estado: "pendiente",
         fechaRegistro: new Date(),
         documentos: {
-          ine: ineFileUrl, 
-          comprobanteDomicilio: addressFileUrl, 
+          ine: ineFileUrl,
+          comprobanteDomicilio: addressFileUrl,
         },
       });
 
@@ -233,21 +270,22 @@ const RegisterScreen: React.FC = () => {
 
       alert("¡Registro completado con éxito! Puedes iniciar sesión ahora.");
       navigation.navigate("Login");
-
     } catch (error: any) {
       console.error("Error en el registro:", error);
-      
+
       try {
         await signOut(auth);
       } catch (logoutError) {
         console.error("Error al hacer logout después de error:", logoutError);
       }
-      
-      if (error.code === 'auth/email-already-in-use') {
-        alert("Este correo electrónico ya está registrado. Usa otro correo o inicia sesión.");
-      } else if (error.code === 'auth/weak-password') {
+
+      if (error.code === "auth/email-already-in-use") {
+        alert(
+          "Este correo electrónico ya está registrado. Usa otro correo o inicia sesión."
+        );
+      } else if (error.code === "auth/weak-password") {
         alert("La contraseña es muy débil. Debe tener al menos 6 caracteres.");
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (error.code === "auth/invalid-email") {
         alert("El formato del correo electrónico no es válido.");
       } else {
         alert(`Ocurrió un error durante el registro: ${error.message}`);
@@ -259,12 +297,14 @@ const RegisterScreen: React.FC = () => {
 
   if (isRegistering) {
     return (
-      <View style={{
-        flex: 1,
-        backgroundColor: "#FEFFF6",
-        justifyContent: "center",
-        alignItems: "center",
-      }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#FEFFF6",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <ActivityIndicator size="large" color="#009951" />
         <Text style={{ marginTop: 10, fontSize: 16, color: "#666" }}>
           Registrando...
@@ -273,9 +313,11 @@ const RegisterScreen: React.FC = () => {
     );
   }
 
-
   return (
-    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
+    <ScrollView
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.container}
+    >
       <View style={styles.container}>
         <HeaderBack
           title="Registro de voluntarios"
@@ -340,8 +382,16 @@ const RegisterScreen: React.FC = () => {
           />
 
           <Text style={styles.label}>Género *</Text>
-          <TouchableOpacity style={styles.input} onPress={() => setShowGenderPicker(true)}>
-            <Text style={[styles.uploadButtonText, { color: gender ? "#000" : "#999" }]}>
+          <TouchableOpacity
+            style={styles.input}
+            onPress={() => setShowGenderPicker(true)}
+          >
+            <Text
+              style={[
+                styles.uploadButtonText,
+                { color: gender ? "#000" : "#999" },
+              ]}
+            >
               {gender || "Selecciona tu género"}
             </Text>
           </TouchableOpacity>
@@ -377,7 +427,9 @@ const RegisterScreen: React.FC = () => {
           <Text style={styles.label}>Comprobante de domicilio *</Text>
           <TouchableOpacity style={styles.input} onPress={pickAddressFile}>
             <Text style={styles.uploadButtonText}>
-              {addressFile ? `✅ ${addressFile.name}` : "📎   Subir comprobante"}
+              {addressFile
+                ? `✅ ${addressFile.name}`
+                : "📎   Subir comprobante"}
             </Text>
           </TouchableOpacity>
 
@@ -414,7 +466,8 @@ const RegisterScreen: React.FC = () => {
               >
                 aviso de privacidad
               </Text>{" "}
-              y autorizo el uso de mis datos personales conforme a la norma aplicable.
+              y autorizo el uso de mis datos personales conforme a la norma
+              aplicable.
             </Text>
           </View>
         </View>
@@ -437,25 +490,31 @@ const RegisterScreen: React.FC = () => {
         transparent={true}
         onRequestClose={() => setShowGenderPicker(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          justifyContent: "center",
-          alignItems: "center",
-        }}>
-          <View style={{
-            backgroundColor: "white",
-            borderRadius: 16,
-            padding: 20,
-            width: "80%",
-            maxWidth: 300,
-          }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: "600",
-              marginBottom: 20,
-              textAlign: "center",
-            }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 16,
+              padding: 20,
+              width: "80%",
+              maxWidth: 300,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                marginBottom: 20,
+                textAlign: "center",
+              }}
+            >
               Selecciona tu género
             </Text>
 
@@ -469,12 +528,14 @@ const RegisterScreen: React.FC = () => {
                 }}
                 onPress={() => selectGender(option)}
               >
-                <Text style={{
-                  fontSize: 16,
-                  textAlign: "center",
-                  color: gender === option ? "#009951" : "#333",
-                  fontWeight: gender === option ? "600" : "400",
-                }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    textAlign: "center",
+                    color: gender === option ? "#009951" : "#333",
+                    fontWeight: gender === option ? "600" : "400",
+                  }}
+                >
                   {option}
                 </Text>
               </TouchableOpacity>

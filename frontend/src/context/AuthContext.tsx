@@ -1,11 +1,31 @@
 //frontend\src\context\AuthContext.tsx
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { app } from '../services/firebaseConfig';
-import { getUserData, UserData } from '../services/api';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from "firebase/auth";
+import { app } from "../services/firebaseConfig";
+import { getUserData, UserData } from "../services/api";
+import { FirebaseApp } from "firebase/app";
+import { getFirestore as _getFirestore } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
-type UserRole = 'voluntario' | 'admin' | 'guardia' | 'superadmin';
+
+function getFirestore(app: FirebaseApp) {
+  return _getFirestore(app);
+}
+
+type UserRole = "voluntario" | "admin" | "guardia" | "superadmin";
 
 interface User {
   id: string;
@@ -25,7 +45,49 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+const db = getFirestore(app);
+
+const getUserDataWithFallback = async (uid: string, email?: string) => {
+  // 1. Buscar en la colección principal (Usuarios)
+  const userRef = doc(db, "Usuarios", uid);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    const data = userSnap.data();
+    return {
+      id: uid,
+      email: data.email ?? email ?? "",
+      name: data.name ?? "",
+      rol: data.rol ?? "",
+      ...data,
+      estado: "registrado",
+      isActive: true,
+    };
+  }
+
+  // 2. Buscar en la colección secundaria (voluntariosPendientes)
+  const pendingRef = doc(db, "voluntariosPendientes", uid);
+  const pendingSnap = await getDoc(pendingRef);
+
+  if (pendingSnap.exists()) {
+    const data = pendingSnap.data();
+    return {
+      id: uid,
+      email: data.email ?? email ?? "",
+      name: data.name ?? "",
+      rol: data.rol ?? "",
+      ...data,
+      estado: "pendiente",
+      isActive: false,
+    };
+  }
+
+  return null;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true); // true inicialmente para verificar estado de auth
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -34,33 +96,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Efecto para escuchar cambios en el estado de autenticación
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        try {
-          // Usuario está logueado, obtener sus datos desde Firestore
-          const userData = await getUserData(firebaseUser.uid, firebaseUser.email || undefined);
-          if (userData) {
-            setUser({
-              id: userData.id,
-              email: userData.email,
-              name: userData.name,
-              role: userData.rol,
-              isActive: userData.isActive || true
-            });
-          } else {
-            //console.error('No se pudieron obtener los datos del usuario');
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (firebaseUser: FirebaseUser | null) => {
+        if (firebaseUser) {
+          try {
+            // Usuario está logueado, obtener sus datos desde Firestore
+            const userData = await getUserDataWithFallback(
+              firebaseUser.uid,
+              firebaseUser.email || undefined
+            );
+            if (userData) {
+              setUser({
+                id: userData.id,
+                email: userData.email,
+                name: userData.name,
+                role: userData.rol,
+                isActive: userData.isActive || true,
+              });
+            } else {
+              //console.error('No se pudieron obtener los datos del usuario');
+              setUser(null);
+            }
+          } catch (error) {
+            console.error("Error obteniendo datos del usuario:", error);
             setUser(null);
           }
-        } catch (error) {
-          console.error('Error obteniendo datos del usuario:', error);
+        } else {
+          // Usuario no está logueado
           setUser(null);
         }
-      } else {
-        // Usuario no está logueado
-        setUser(null);
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    );
 
     // Cleanup subscription
     return unsubscribe;
@@ -69,48 +137,59 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     setLoginError(null);
-    
+
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
       // Obtener datos del usuario desde Firestore
-      const userData = await getUserData(userCredential.user.uid, userCredential.user.email || email);
-      
+      const userData = await getUserDataWithFallback(
+        userCredential.user.uid,
+        userCredential.user.email || email
+      );
+
       if (userData) {
         setUser({
           id: userData.id,
           email: userData.email,
           name: userData.name,
           role: userData.rol,
-          isActive: userData.isActive || false
+          isActive: userData.isActive || false,
         });
         return true;
       } else {
-        setLoginError('Tu cuenta no está registrada en nuestro sistema. Contacta al administrador.');
+        setLoginError(
+          "Tu cuenta no está registrada en nuestro sistema. Contacta al administrador."
+        );
         return false;
       }
     } catch (error: any) {
-      console.error('Error en login:', error);
-      
-      let userFriendlyError = 'Ocurrió un error inesperado.';
+      console.error("Error en login:", error);
+
+      let userFriendlyError = "Ocurrió un error inesperado.";
       if (error?.code) {
         switch (error.code) {
           case "auth/user-not-found":
           case "auth/invalid-credential":
-            userFriendlyError = 'Correo o contraseña incorrectos.';
+            userFriendlyError = "Correo o contraseña incorrectos.";
             break;
           case "auth/invalid-email":
-            userFriendlyError = 'El formato del correo electrónico no es válido.';
+            userFriendlyError =
+              "El formato del correo electrónico no es válido.";
             break;
           case "auth/network-request-failed":
-            userFriendlyError = 'Error de red. Revisa tu conexión a internet.';
+            userFriendlyError = "Error de red. Revisa tu conexión a internet.";
             break;
           case "auth/too-many-requests":
-            userFriendlyError = 'Demasiados intentos fallidos. Intenta más tarde.';
+            userFriendlyError =
+              "Demasiados intentos fallidos. Intenta más tarde.";
             break;
         }
       }
-      
+
       setLoginError(userFriendlyError);
       return false;
     } finally {
@@ -123,13 +202,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await signOut(auth);
       setUser(null);
     } catch (error) {
-      console.error('Error en logout:', error);
+      console.error("Error en logout:", error);
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, loginError }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoading, loginError }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -138,7 +219,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
+

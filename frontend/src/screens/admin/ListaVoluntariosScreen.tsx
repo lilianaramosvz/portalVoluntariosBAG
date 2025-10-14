@@ -64,6 +64,7 @@ const ListaVoluntariosScreen: React.FC = () => {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collection(db, "Usuarios"));
+
       const voluntariosData: Voluntario[] = [];
 
       querySnapshot.forEach((doc) => {
