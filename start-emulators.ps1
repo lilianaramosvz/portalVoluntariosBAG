@@ -2,6 +2,6 @@
 # PowerShell helper to start Firebase emulators for this repo
 # Usage: Open PowerShell, run: .\start-emulators.ps1
 
-Write-Host "Starting Firebase emulators (functions, firestore, auth)..."
+Write-Host "Starting Firebase emulators (functions, firestore)..."
 cd $PSScriptRoot
-firebase emulators:start --only functions,firestore,auth
+firebase emulators:start --only functions,firestore

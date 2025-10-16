@@ -16,10 +16,10 @@ cd c:\Users\silvi\Desktop\Proyectos\DesarrolloMovil\portalVoluntariosBAG
 # optional: run helper script
 .\start-emulators.ps1
 # or run directly
-firebase emulators:start --only functions,firestore,auth
+firebase emulators:start --only functions,firestore
 ```
 
-The Functions emulator listens on port 5001, Firestore on 8080 and Auth on 9099 by default.
+The Functions emulator listens on port 5001 and Firestore on 8080 by default.
 
 2) Point the frontend to emulators
 
@@ -36,8 +36,8 @@ Notes for Android emulator and physical devices
 - For real devices, replace `localhost` with your machine IP in `firebaseConfig` or set an env var to point the emulator host.
 
 3) Test the flow
-- Create a test user via the Auth emulator (use the Emulator UI or sign up through the app).
-- From the app sign in as the test user and open the QR screen. The app will call the callable function and the Functions emulator will handle it.
+-- Create a test user via your production Auth or sign up through the app (we do not run an Auth emulator by default).
+-- From the app sign in as the test user and open the QR screen. The app will call the callable function and the Functions emulator will handle it.
 - Watch the terminal running emulators for function logs and invocation details.
 - Use Emulator UI at http://localhost:4000 to inspect Firestore and Auth state.
 

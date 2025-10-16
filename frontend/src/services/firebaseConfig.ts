@@ -1,6 +1,6 @@
 // src/services/firebaseConfig.ts
 import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { Platform } from 'react-native';
@@ -24,7 +24,9 @@ export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
 // Enable emulators only when explicitly requested. This avoids changing production behavior.
-const USE_EMULATOR = process.env.EXPO_USE_FIREBASE_EMULATOR === 'true' || __DEV__;
+// Use EXPO_USE_FIREBASE_EMULATOR to enable Firestore+Functions emulators.
+// Use EXPO_USE_FIREBASE_EMULATOR to enable Firestore+Functions emulators.
+const USE_EMULATOR = process.env.EXPO_USE_FIREBASE_EMULATOR === 'true';
 
 if (USE_EMULATOR) {
   // Choose host depending on platform. Android emulator uses 10.0.2.2
@@ -33,13 +35,10 @@ if (USE_EMULATOR) {
   // Firestore emulator (default port 8080)
   connectFirestoreEmulator(db, host, 8080);
 
-  // Auth emulator (default port 9099)
-  connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
-
   // Functions emulator (default port 5001)
   connectFunctionsEmulator(functions, host, 5001);
 
   // Helpful log during development
   // eslint-disable-next-line no-console
-  console.log(`[firebase] connected to emulators on ${host}`);
+  console.log(`[firebase] connected to Firestore+Functions emulators on ${host}`);
 }
