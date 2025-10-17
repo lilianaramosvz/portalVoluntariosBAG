@@ -9,6 +9,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "../../context/AuthContext";
 import { HeaderLogout } from "../../components/headerTitle";
 import { AdminStackParamList } from "../../navigation/AdminNavigator";
+import { Colors } from "../../styles/colors";
 
 type DashboardAdminScreenProp = StackNavigationProp<AdminStackParamList, "DashboardAdmin">;
 
@@ -30,7 +31,7 @@ const DashboardAdminScreen: React.FC = () => {
 
         {/* Card de bienvenida */}
         <View style={styles.card}>
-          <MaterialIcons name="account-circle" size={90} color="#afabffff" />
+          <MaterialIcons name="account-circle" size={90} color={Colors.purple} />
           <Text style={styles.welcomeText}>¡Bienvenido Admin!</Text>
         </View>
 
