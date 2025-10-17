@@ -48,6 +48,14 @@ const DashboardScreen: React.FC = () => {
         </Text>
       </View>
 
+      {/* Button to open QR screen */}
+      <TouchableOpacity
+        style={[styles.card, { marginTop: 16, alignItems: 'center' }]}
+        onPress={() => navigation.navigate('QRGenerator')}
+      >
+        <Text style={{ color: '#fff', fontSize: 16 }}>Abrir código QR</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };

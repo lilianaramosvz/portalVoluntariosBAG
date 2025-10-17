@@ -11,3 +11,4 @@ try {
 
 // Re-export functions implemented in src/
 exports.createAccessToken = require('./src/QrGeneration').createAccessToken;
+exports.redeemAccessToken = require('./src/QrRedemption').redeemAccessToken;

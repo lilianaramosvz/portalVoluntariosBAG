@@ -3,6 +3,7 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import DashboardScreen from "../screens/voluntario/DashboardScreen";
+import QRGenerator from "../screens/voluntario/QrScreen";
 
 export type VoluntarioStackParamList = {
   Dashboard: undefined;
@@ -25,6 +26,11 @@ const VoluntarioNavigator = () => {
         component={DashboardScreen}
         options={{ title: "Dashboard" }}
       />
+        <Stack.Screen
+          name="QRGenerator"
+          component={QRGenerator}
+          options={{ title: "QR Generator" }}
+        />
     </Stack.Navigator>
   );
 };

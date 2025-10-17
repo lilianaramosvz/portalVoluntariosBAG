@@ -5,23 +5,46 @@ import QrDisplay from '../../components/QrDisplay';
 import { createAccessToken } from '../../services/qrFunctions';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {useNavigation, ParamListBase} from "@react-navigation/native";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const VistaQR = () => {
   	const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
         const [token, setToken] = React.useState<string | null>(null);
         const [loading, setLoading] = React.useState(false);
         const [error, setError] = React.useState<string | null>(null);
-    
-        async function fetchToken() {
+        const [user, setUser] = React.useState<any>(null);
+
+        const auth = getAuth();
+
+    // Listen for Firebase auth state
+    React.useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+            setUser(firebaseUser);
+            fetchToken(firebaseUser); // fetch token once user is authenticated
+        } else {
+            setUser(null);
+            setToken(null);
+        }
+        });
+
+    return () => unsubscribe();
+  }, []);
+
+        async function fetchToken(currentUser?: any) {
+            if (!currentUser) return; // user not signed in yet
             setLoading(true);
             setError(null);
+
             try {
+                
                 const data = await createAccessToken();
                 setToken(data.token);
                 // Clear token after 5 minutes + small buffer
                 setTimeout(() => setToken(null), 300 * 1000 + 1000);
             } catch (e) {
                 setError('No se pudo generar el QR');
+                console.log(e);
             } finally {
                 setLoading(false);
             }
