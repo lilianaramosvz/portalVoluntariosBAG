@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { app } from '../services/firebaseConfig';
 import { getUserData, UserData } from '../services/api';
+import { SecureTokenStorage } from '../services/secureStorage';
+import { SecureErrorHandler } from '../utils/errorHandler';
+import { validateEmail } from '../utils/validators';
 
 type UserRole = 'voluntario' | 'admin' | 'guardia' | 'superadmin';
 
@@ -34,9 +37,54 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Efecto para escuchar cambios en el estado de autenticación
   useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Verificar tokens almacenados de forma segura
+        const storedToken = await SecureTokenStorage.getAuthToken();
+        const storedRole = await SecureTokenStorage.getUserRole();
+        
+        if (storedToken && storedRole) {
+          // Verificar si el token sigue siendo válido
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            const userData = await getUserData(currentUser.uid, currentUser.email || undefined);
+            if (userData) {
+              setUser({
+                id: userData.id,
+                email: userData.email,
+                name: userData.name,
+                role: storedRole as UserRole,
+                isActive: userData.isActive || true
+              });
+            }
+          } else {
+            // Token expirado, limpiar storage
+            await SecureTokenStorage.clearAllData();
+          }
+        }
+      } catch (error: any) {
+        const userMessage = SecureErrorHandler.handleAuthError(error, 'INIT');
+        console.warn('Auth initialization error:', userMessage);
+        await SecureTokenStorage.clearAllData();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         try {
+          // Obtener el token con customClaims
+          const idTokenResult = await firebaseUser.getIdTokenResult();
+          const userRole = idTokenResult.claims.role as UserRole || 'voluntario';
+          const token = idTokenResult.token;
+          
+          // Almacenar en SecureStorage
+          await SecureTokenStorage.setAuthToken(token);
+          await SecureTokenStorage.setUserRole(userRole);
+          
           // Usuario está logueado, obtener sus datos desde Firestore
           const userData = await getUserData(firebaseUser.uid, firebaseUser.email || undefined);
           if (userData) {
@@ -44,23 +92,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               id: userData.id,
               email: userData.email,
               name: userData.name,
-              role: userData.rol,
+              role: userRole, // Usar rol desde customClaims, no desde Firestore
               isActive: userData.isActive || true
             });
           } else {
-            //console.error('No se pudieron obtener los datos del usuario');
-            setUser(null);
+            // Si no hay datos en Firestore pero sí customClaims, crear usuario básico
+            setUser({
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || 'Usuario',
+              role: userRole,
+              isActive: true
+            });
           }
         } catch (error) {
-          console.error('Error obteniendo datos del usuario:', error);
+          const userMessage = SecureErrorHandler.handleAuthError(error, 'AUTH_STATE_CHANGE');
+          console.error('Error obteniendo datos del usuario:', userMessage);
           setUser(null);
         }
       } else {
         // Usuario no está logueado
         setUser(null);
+        await SecureTokenStorage.clearAllData();
       }
       setIsLoading(false);
     });
+
+    // Inicializar auth al montar el componente
+    initializeAuth();
 
     // Cleanup subscription
     return unsubscribe;
@@ -71,7 +130,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoginError(null);
     
     try {
+      // Validar email (solo formato básico para login)
+      const emailValidation = validateEmail(email);
+      if (!emailValidation.isValid) {
+        setLoginError(emailValidation.error || 'Formato de correo inválido');
+        return false;
+      }
+
+      // Para login no validamos la contraseña - usuarios existentes pueden tener contraseñas simples
+      // La validación robusta solo aplica para nuevos registros
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Obtener el token con customClaims
+      const idTokenResult = await userCredential.user.getIdTokenResult();
+      const userRole = idTokenResult.claims.role as UserRole || 'voluntario';
+      const token = idTokenResult.token;
+      
+      // Almacenar en SecureStorage
+      await SecureTokenStorage.setAuthToken(token);
+      await SecureTokenStorage.setUserRole(userRole);
       
       // Obtener datos del usuario desde Firestore
       const userData = await getUserData(userCredential.user.uid, userCredential.user.email || email);
@@ -81,36 +159,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           id: userData.id,
           email: userData.email,
           name: userData.name,
-          role: userData.rol,
+          role: userRole, // Usar rol desde customClaims
           isActive: userData.isActive || false
         });
         return true;
       } else {
-        setLoginError('Tu cuenta no está registrada en nuestro sistema. Contacta al administrador.');
-        return false;
+        // Si no hay datos en Firestore pero el usuario tiene customClaims válidos
+        if (userRole && userRole !== 'voluntario') {
+          setUser({
+            id: userCredential.user.uid,
+            email: userCredential.user.email || email,
+            name: userCredential.user.displayName || 'Usuario',
+            role: userRole,
+            isActive: true
+          });
+          return true;
+        } else {
+          setLoginError('Tu cuenta no está registrada en nuestro sistema. Contacta al administrador.');
+          return false;
+        }
       }
     } catch (error: any) {
       console.error('Error en login:', error);
       
-      let userFriendlyError = 'Ocurrió un error inesperado.';
-      if (error?.code) {
-        switch (error.code) {
-          case "auth/user-not-found":
-          case "auth/invalid-credential":
-            userFriendlyError = 'Correo o contraseña incorrectos.';
-            break;
-          case "auth/invalid-email":
-            userFriendlyError = 'El formato del correo electrónico no es válido.';
-            break;
-          case "auth/network-request-failed":
-            userFriendlyError = 'Error de red. Revisa tu conexión a internet.';
-            break;
-          case "auth/too-many-requests":
-            userFriendlyError = 'Demasiados intentos fallidos. Intenta más tarde.';
-            break;
-        }
-      }
-      
+      // Usar SecureErrorHandler para manejo seguro de errores
+      const userFriendlyError = SecureErrorHandler.handleAuthError(error, 'LOGIN');
       setLoginError(userFriendlyError);
       return false;
     } finally {
@@ -120,11 +193,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async (): Promise<void> => {
     try {
+      setIsLoading(true);
+      
+      // Limpiar tokens seguros
+      await SecureTokenStorage.clearAllData();
+      
+      // Firebase logout
       await signOut(auth);
       setUser(null);
-    } catch (error) {
-      console.error('Error en logout:', error);
+    } catch (error: any) {
+      const userMessage = SecureErrorHandler.handleAuthError(error, 'LOGOUT');
+      console.warn('Logout error:', userMessage);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
