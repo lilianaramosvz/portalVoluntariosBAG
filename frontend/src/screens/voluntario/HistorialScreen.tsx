@@ -8,7 +8,7 @@ export default function HistorialScreen() {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={styles.container}>
       <View style={{ flex: 1, justifyContent: "space-between", padding: 18 }}>
         <HeaderBack
           title="Historial de asistencias"
