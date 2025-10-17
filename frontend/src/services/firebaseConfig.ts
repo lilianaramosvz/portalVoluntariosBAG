@@ -1,6 +1,8 @@
 // src/services/firebaseConfig.ts
 
 import { initializeApp } from "firebase/app";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+
 
 // Lee las credenciales desde las variables de entorno
 const firebaseConfig = {
@@ -14,3 +16,9 @@ const firebaseConfig = {
 
 // Inicializa Firebase y exporta la instancia de la app
 export const app = initializeApp(firebaseConfig);
+
+// Inicializa App Check con reCAPTCHA v3
+export const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider("6LfN_u0rAAAAAN8l7XQEiG6Gjo4q6Cv_L0NSTvih"), // Clave del sitio reCAPTCHA v3
+  isTokenAutoRefreshEnabled: true, // Mantiene el token actualizado automáticamente
+});
