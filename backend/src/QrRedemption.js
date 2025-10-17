@@ -34,18 +34,24 @@ exports.redeemAccessToken = onCall(
     const uid = auth.uid;
     const db = admin.firestore();
 
+    console.log('[redeemAccessToken] Starting redemption:', { uid, token: token.substring(0, 4) + '...' });
+
     try {
       // Verify user role - only guards can redeem QR codes
       const userDoc = await db.collection('Usuarios').doc(uid).get();
       
       if (!userDoc.exists) {
+        console.error('[redeemAccessToken] User not found:', uid);
         throw new HttpsError('not-found', 'User profile not found.');
       }
 
       const userData = userDoc.data();
       const userRole = userData.rol || userData.role;
 
+      console.log('[redeemAccessToken] User role:', userRole);
+
       if (userRole !== 'guardia') {
+        console.error('[redeemAccessToken] Permission denied. Role:', userRole);
         throw new HttpsError(
           'permission-denied',
           'Only guards can redeem access tokens.'
@@ -55,14 +61,18 @@ exports.redeemAccessToken = onCall(
       // Find and validate token in transaction
       const result = await db.runTransaction(async (transaction) => {
         // Query for the token
+        console.log('[redeemAccessToken] Querying for token...');
         const tokensQuery = await db.collection('qrCodes')
           .where('token', '==', token)
           .limit(1)
           .get();
 
         if (tokensQuery.empty) {
+          console.error('[redeemAccessToken] Token not found:', token.substring(0, 4) + '...');
           throw new HttpsError('not-found', 'Invalid token.');
         }
+
+        console.log('[redeemAccessToken] Token found, validating...');
 
         const tokenDoc = tokensQuery.docs[0];
         const tokenData = tokenDoc.data();
@@ -84,7 +94,12 @@ exports.redeemAccessToken = onCall(
           throw new HttpsError('failed-precondition', 'Token has already been used.');
         }
 
-        // Update token - increment used count
+        // IMPORTANT: Read volunteer
+        const volunteerDoc = await transaction.get(
+          db.collection('Usuarios').doc(tokenData.createdBy)
+        );
+
+        // Now do the write operations
         const newUsedCount = tokenData.usedCount + 1;
         const updates = {
           usedCount: newUsedCount,
@@ -99,10 +114,7 @@ exports.redeemAccessToken = onCall(
 
         transaction.update(tokenRef, updates);
 
-        // Get volunteer info for response
-        const volunteerDoc = await transaction.get(
-          db.collection('Usuarios').doc(tokenData.createdBy)
-        );
+        console.log('[redeemAccessToken] Token redeemed successfully');
 
         return {
           success: true,
@@ -117,6 +129,7 @@ exports.redeemAccessToken = onCall(
         };
       });
 
+      console.log('[redeemAccessToken] Success');
       return result;
     } catch (error) {
       console.error('[redeemAccessToken] Error:', error);
