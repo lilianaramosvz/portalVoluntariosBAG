@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@firebase/functions": "^0.13.1",
-    "expo": "^54.0.13",
-    "firebase": "^12.4.0"
-  }
-}
