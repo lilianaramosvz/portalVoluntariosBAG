@@ -19,6 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
 import { useAuth } from "../../context/AuthContext";
+import { validateEmail } from "../../utils/validators";
 
 type LoginScreenProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -27,15 +28,38 @@ const LoginScreen: React.FC = () => {
   const { login, isLoading, loginError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showValidationError, setShowValidationError] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const validateInputs = () => {
+    let isValid = true;
+    
+    // Validar email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      setEmailError(emailValidation.error || 'Formato de correo inválido');
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+    
+    // Para login solo verificamos que la contraseña no esté vacía
+    // No aplicamos validación robusta porque usuarios existentes pueden tener contraseñas simples
+    if (!password.trim()) {
+      setPasswordError('La contraseña es requerida');
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+    
+    return isValid;
+  };
 
   const handleLogin = async () => { 
-    if (!email.trim() || !password.trim()) {
-      setShowValidationError(true);
+    if (!validateInputs()) {
       return;
     }
     
-    setShowValidationError(false);
     await login(email, password);
     // El AuthContext manejará automáticamente la navegación por rol y los errores
   };
@@ -53,27 +77,31 @@ const LoginScreen: React.FC = () => {
       <View style={styles.form}>
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, emailError ? styles.inputError : {}]}
           placeholder="tu@correo.com"
           keyboardType="email-address"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (emailError) setEmailError("");
+          }}
           autoCapitalize="none"
         />
+        {emailError && <Text style={styles.error}>{emailError}</Text>}
 
         <Text style={styles.label}>Contraseña</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, passwordError ? styles.inputError : {}]}
           placeholder="******"
           secureTextEntry
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (passwordError) setPasswordError("");
+          }}
         />
+        {passwordError && <Text style={styles.error}>{passwordError}</Text>}
 
-        {showValidationError && (
-          <Text style={styles.error}>Por favor ingresa tu correo y contraseña.</Text>
-        )}
-        
         {loginError && <Text style={styles.error}>{loginError}</Text>}
 
         <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>

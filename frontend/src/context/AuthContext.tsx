@@ -1,31 +1,14 @@
 //frontend\src\context\AuthContext.tsx
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User as FirebaseUser,
-} from "firebase/auth";
-import { app } from "../services/firebaseConfig";
-import { getUserData, UserData } from "../services/api";
-import { FirebaseApp } from "firebase/app";
-import { getFirestore as _getFirestore } from "firebase/firestore";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { app } from '../services/firebaseConfig';
+import { getUserData, UserData } from '../services/api';
+import { SecureTokenStorage } from '../services/secureStorage';
+import { SecureErrorHandler } from '../utils/errorHandler';
+import { validateEmail } from '../utils/validators';
 
-
-function getFirestore(app: FirebaseApp) {
-  return _getFirestore(app);
-}
-
-type UserRole = "voluntario" | "admin" | "guardia" | "superadmin";
+type UserRole = 'voluntario' | 'admin' | 'guardia' | 'superadmin';
 
 interface User {
   id: string;
@@ -45,49 +28,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const db = getFirestore(app);
-
-const getUserDataWithFallback = async (uid: string, email?: string) => {
-  // 1. Buscar en la colección principal (Usuarios)
-  const userRef = doc(db, "Usuarios", uid);
-  const userSnap = await getDoc(userRef);
-
-  if (userSnap.exists()) {
-    const data = userSnap.data();
-    return {
-      id: uid,
-      email: data.email ?? email ?? "",
-      name: data.name ?? "",
-      rol: data.rol ?? "",
-      ...data,
-      estado: "registrado",
-      isActive: true,
-    };
-  }
-
-  // 2. Buscar en la colección secundaria (voluntariosPendientes)
-  const pendingRef = doc(db, "voluntariosPendientes", uid);
-  const pendingSnap = await getDoc(pendingRef);
-
-  if (pendingSnap.exists()) {
-    const data = pendingSnap.data();
-    return {
-      id: uid,
-      email: data.email ?? email ?? "",
-      name: data.name ?? "",
-      rol: data.rol ?? "",
-      ...data,
-      estado: "pendiente",
-      isActive: false,
-    };
-  }
-
-  return null;
-};
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true); // true inicialmente para verificar estado de auth
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -96,39 +37,89 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   // Efecto para escuchar cambios en el estado de autenticación
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (firebaseUser: FirebaseUser | null) => {
-        if (firebaseUser) {
-          try {
-            // Usuario está logueado, obtener sus datos desde Firestore
-            const userData = await getUserDataWithFallback(
-              firebaseUser.uid,
-              firebaseUser.email || undefined
-            );
+    const initializeAuth = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Verificar tokens almacenados de forma segura
+        const storedToken = await SecureTokenStorage.getAuthToken();
+        const storedRole = await SecureTokenStorage.getUserRole();
+        
+        if (storedToken && storedRole) {
+          // Verificar si el token sigue siendo válido
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            const userData = await getUserData(currentUser.uid, currentUser.email || undefined);
             if (userData) {
               setUser({
                 id: userData.id,
                 email: userData.email,
                 name: userData.name,
-                role: userData.rol,
-                isActive: userData.isActive || true,
+                role: storedRole as UserRole,
+                isActive: userData.isActive || true
               });
-            } else {
-              //console.error('No se pudieron obtener los datos del usuario');
-              setUser(null);
             }
-          } catch (error) {
-            console.error("Error obteniendo datos del usuario:", error);
-            setUser(null);
+          } else {
+            // Token expirado, limpiar storage
+            await SecureTokenStorage.clearAllData();
           }
-        } else {
-          // Usuario no está logueado
-          setUser(null);
         }
+      } catch (error: any) {
+        const userMessage = SecureErrorHandler.handleAuthError(error, 'INIT');
+        console.warn('Auth initialization error:', userMessage);
+        await SecureTokenStorage.clearAllData();
+      } finally {
         setIsLoading(false);
       }
-    );
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        try {
+          // Obtener el token con customClaims
+          const idTokenResult = await firebaseUser.getIdTokenResult();
+          const userRole = idTokenResult.claims.role as UserRole || 'voluntario';
+          const token = idTokenResult.token;
+          
+          // Almacenar en SecureStorage
+          await SecureTokenStorage.setAuthToken(token);
+          await SecureTokenStorage.setUserRole(userRole);
+          
+          // Usuario está logueado, obtener sus datos desde Firestore
+          const userData = await getUserData(firebaseUser.uid, firebaseUser.email || undefined);
+          if (userData) {
+            setUser({
+              id: userData.id,
+              email: userData.email,
+              name: userData.name,
+              role: userRole, // Usar rol desde customClaims, no desde Firestore
+              isActive: userData.isActive || true
+            });
+          } else {
+            // Si no hay datos en Firestore pero sí customClaims, crear usuario básico
+            setUser({
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || 'Usuario',
+              role: userRole,
+              isActive: true
+            });
+          }
+        } catch (error) {
+          const userMessage = SecureErrorHandler.handleAuthError(error, 'AUTH_STATE_CHANGE');
+          console.error('Error obteniendo datos del usuario:', userMessage);
+          setUser(null);
+        }
+      } else {
+        // Usuario no está logueado
+        setUser(null);
+        await SecureTokenStorage.clearAllData();
+      }
+      setIsLoading(false);
+    });
+
+    // Inicializar auth al montar el componente
+    initializeAuth();
 
     // Cleanup subscription
     return unsubscribe;
@@ -137,59 +128,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     setLoginError(null);
-
+    
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      // Validar email (solo formato básico para login)
+      const emailValidation = validateEmail(email);
+      if (!emailValidation.isValid) {
+        setLoginError(emailValidation.error || 'Formato de correo inválido');
+        return false;
+      }
 
+      // Para login no validamos la contraseña - usuarios existentes pueden tener contraseñas simples
+      // La validación robusta solo aplica para nuevos registros
+
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Obtener el token con customClaims
+      const idTokenResult = await userCredential.user.getIdTokenResult();
+      const userRole = idTokenResult.claims.role as UserRole || 'voluntario';
+      const token = idTokenResult.token;
+      
+      // Almacenar en SecureStorage
+      await SecureTokenStorage.setAuthToken(token);
+      await SecureTokenStorage.setUserRole(userRole);
+      
       // Obtener datos del usuario desde Firestore
-      const userData = await getUserDataWithFallback(
-        userCredential.user.uid,
-        userCredential.user.email || email
-      );
-
+      const userData = await getUserData(userCredential.user.uid, userCredential.user.email || email);
+      
       if (userData) {
         setUser({
           id: userData.id,
           email: userData.email,
           name: userData.name,
-          role: userData.rol,
-          isActive: userData.isActive || false,
+          role: userRole, // Usar rol desde customClaims
+          isActive: userData.isActive || false
         });
         return true;
       } else {
-        setLoginError(
-          "Tu cuenta no está registrada en nuestro sistema. Contacta al administrador."
-        );
-        return false;
-      }
-    } catch (error: any) {
-      console.error("Error en login:", error);
-
-      let userFriendlyError = "Ocurrió un error inesperado.";
-      if (error?.code) {
-        switch (error.code) {
-          case "auth/user-not-found":
-          case "auth/invalid-credential":
-            userFriendlyError = "Correo o contraseña incorrectos.";
-            break;
-          case "auth/invalid-email":
-            userFriendlyError =
-              "El formato del correo electrónico no es válido.";
-            break;
-          case "auth/network-request-failed":
-            userFriendlyError = "Error de red. Revisa tu conexión a internet.";
-            break;
-          case "auth/too-many-requests":
-            userFriendlyError =
-              "Demasiados intentos fallidos. Intenta más tarde.";
-            break;
+        // Si no hay datos en Firestore pero el usuario tiene customClaims válidos
+        if (userRole && userRole !== 'voluntario') {
+          setUser({
+            id: userCredential.user.uid,
+            email: userCredential.user.email || email,
+            name: userCredential.user.displayName || 'Usuario',
+            role: userRole,
+            isActive: true
+          });
+          return true;
+        } else {
+          setLoginError('Tu cuenta no está registrada en nuestro sistema. Contacta al administrador.');
+          return false;
         }
       }
-
+    } catch (error: any) {
+      console.error('Error en login:', error);
+      
+      // Usar SecureErrorHandler para manejo seguro de errores
+      const userFriendlyError = SecureErrorHandler.handleAuthError(error, 'LOGIN');
       setLoginError(userFriendlyError);
       return false;
     } finally {
@@ -199,18 +193,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const logout = async (): Promise<void> => {
     try {
+      setIsLoading(true);
+      
+      // Limpiar tokens seguros
+      await SecureTokenStorage.clearAllData();
+      
+      // Firebase logout
       await signOut(auth);
       setUser(null);
-    } catch (error) {
-      console.error("Error en logout:", error);
+    } catch (error: any) {
+      const userMessage = SecureErrorHandler.handleAuthError(error, 'LOGOUT');
+      console.warn('Logout error:', userMessage);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, login, logout, isLoading, loginError }}
-    >
+    <AuthContext.Provider value={{ user, login, logout, isLoading, loginError }}>
       {children}
     </AuthContext.Provider>
   );
@@ -219,8 +220,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
-
