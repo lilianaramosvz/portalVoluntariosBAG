@@ -1,233 +1,300 @@
-import * as React from "react";
-import {StyleSheet, View, Text, Pressable, Image, ActivityIndicator} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import QrDisplay from '../../components/QrDisplay';
 import { createAccessToken } from '../../services/qrFunctions';
-import { StackNavigationProp } from '@react-navigation/stack';
-import {useNavigation, ParamListBase} from "@react-navigation/native";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-const VistaQR = () => {
-  	const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-        const [token, setToken] = React.useState<string | null>(null);
-        const [loading, setLoading] = React.useState(false);
-        const [error, setError] = React.useState<string | null>(null);
-        const [user, setUser] = React.useState<any>(null);
+const QR_EXPIRY_SECONDS = 300; // 5 minutes
 
-        const auth = getAuth();
+const QrScreen = () => {
+  const navigation = useNavigation<StackNavigationProp<any>>();
+  const [token, setToken] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true); // Start as true to show loading while checking auth
+  const [timeRemaining, setTimeRemaining] = useState<number>(QR_EXPIRY_SECONDS);
+  const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
-    // Listen for Firebase auth state
-    React.useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-        if (firebaseUser) {
-            setUser(firebaseUser);
-            fetchToken(firebaseUser); // fetch token once user is authenticated
-        } else {
-            setUser(null);
-            setToken(null);
-        }
-        });
+  const auth = getAuth();
 
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setAuthChecked(true);
+      setLoading(false);
+    });
     return () => unsubscribe();
   }, []);
 
-        async function fetchToken(currentUser?: any) {
-            if (!currentUser) return; // user not signed in yet
-            setLoading(true);
-            setError(null);
+  // Timer countdown
+  useEffect(() => {
+    if (!expiresAt) return;
 
-            try {
-                
-                const data = await createAccessToken();
-                setToken(data.token);
-                // Clear token after 5 minutes + small buffer
-                setTimeout(() => setToken(null), 300 * 1000 + 1000);
-            } catch (e) {
-                setError('No se pudo generar el QR');
-                console.log(e);
-            } finally {
-                setLoading(false);
-            }
-        }
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+      setTimeRemaining(remaining);
 
-        React.useEffect(() => {
-            fetchToken();
-            return () => setToken(null);
-        }, []);
-    
-    return (
-        <SafeAreaView style={styles.vistaQr}>
-        <View style={styles.view}>
-                    <View style={[styles.formLogIn, styles.formLayout]} />
-                    <Pressable style={styles.button} onPress={() => fetchToken()}>
-                <Text style={styles.vistaQrButton}>Renovar código QR</Text>
-                                </Pressable>
-                            <Text style={styles.tuCdigoDe}>Tu código de asistencia</Text>
-                <Text style={[styles.id1Presenta, styles.id1PresentaTypo]}>{`ID: 1
+      if (remaining === 0) {
+        setToken(null);
+        setExpiresAt(null);
+      }
+    }, 1000);
 
-                Presenta este código al guardia para registrar tu entrada`}</Text>
-                    <View style={[styles.vistaQrFormLogIn, styles.formLayout]} />
-                    <Text style={[styles.tiempoRestantePara, styles.id1PresentaTypo]}>Tiempo restante para expiración</Text>
-            <Text style={styles.text}>5:00</Text>
-            {/* decorative asset removed or handled elsewhere */}
-                        <View style={{ top: 120, left: 0, right: 0, alignItems: 'center' }}>
-                            {!loading && token && <QrDisplay value={token} />}
-                            {!loading && !token && <Text style={{ color: '#999' }}>No hay código</Text>}
-                            {error && <Text style={{ color: 'red' }}>{error}</Text>}
-                        </View>
+    return () => clearInterval(interval);
+  }, [expiresAt]);
 
-                        {/* overlay while generating */}
-                        {loading && (
-                            <View style={styles.overlay}>
-                                <ActivityIndicator size="large" color="#009951" />
-                            </View>
-                        )}
-                    <Pressable style={styles.arrowBack} onPress={() => navigation.goBack()}>
-                <Image style={styles.icon} resizeMode="cover" />
-                    </Pressable>
-                    <Text style={[styles.cdigoDeAsistencia, styles.childPosition]}>Código de asistencia</Text>
-                    </View>
-                    </SafeAreaView>);
-                    };
-                    
-                    const styles = StyleSheet.create({
-                            vistaQr: {
-                                flex: 1
-                            },
-                            formLayout: {
-                                minWidth: 320,
-                                borderColor: "#d9d9d9",
-                                elevation: 4,
-                                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-                                width: 320,
-                                borderWidth: 1,
-                                borderStyle: "solid",
-                                backgroundColor: "#fff",
-                                borderRadius: 8,
-                                left: 37,
-                                position: "absolute"
-                            },
-                            id1PresentaTypo: {
-                                lineHeight: 22,
-                                width: 272,
-                                textAlign: "center",
-                                left: 61,
-                                color: "#1e1e1e",
-                                fontFamily: "Inter-Regular",
-                                fontSize: 16,
-                                position: "absolute"
-                            },
-                            childPosition: {
-                                left: "50%",
-                                position: "absolute"
-                            },
-                            view: {
-                                height: 917,
-                                overflow: "hidden",
-                                width: "100%",
-                                flex: 1
-                            },
-                            formLogIn: {
-                                top: 310,
-                                height: 406
-                            },
-                            button: {
-                                top: 757,
-                                borderColor: "#14ae5c",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                padding: 12,
-                                width: 320,
-                                borderWidth: 1,
-                                borderStyle: "solid",
-                                backgroundColor: "#fff",
-                                borderRadius: 8,
-                                left: 37,
-                                position: "absolute",
-                                overflow: "hidden"
-                            },
-                            vistaQrButton: {
-                                lineHeight: 16,
-                                textAlign: "left",
-                                color: "#1e1e1e",
-                                fontFamily: "Inter-Regular",
-                                fontSize: 16
-                            },
-                            tuCdigoDe: {
-                                top: 343,
-                                lineHeight: 24,
-                                width: 272,
-                                left: 61,
-                                textAlign: "center",
-                                fontSize: 20,
-                                color: "#1e1e1e",
-                                fontFamily: "Inter-Regular",
-                                position: "absolute"
-                            },
-                            id1Presenta: {
-                                top: 604
-                            },
-                            vistaQrFormLogIn: {
-                                top: 153,
-                                height: 125
-                            },
-                            tiempoRestantePara: {
-                                top: 228
-                            },
-                            text: {
-                                top: 182,
-                                left: 127,
-                                fontSize: 24,
-                                letterSpacing: -0.5,
-                                lineHeight: 29,
-                                fontWeight: "600",
-                                fontFamily: "Inter-SemiBold",
-                                color: "#009951",
-                                width: 139,
-                                textAlign: "center",
-                                position: "absolute"
-                            },
-                            child: {
-                                marginLeft: -162,
-                                top: 118,
-                                maxHeight: "100%",
-                                width: 324,
-                                color: "#000"
-                            },
-                            arrowBack: {
-                                left: 38,
-                                top: 68,
-                                width: 28,
-                                height: 28,
-                                position: "absolute"
-                            },
-                            icon: {
-                                height: '100%',
-                                color: '#1d1b20',
-                                width: '100%'
-                            },
-                            overlay: {
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(255,255,255,0.6)'
-                            },
-                            cdigoDeAsistencia: {
-                                marginLeft: -122,
-                                top: 71,
-                                lineHeight: 22,
-                                color: "#02542d",
-                                fontSize: 20,
-                                left: "50%",
-                                textAlign: "left",
-                                fontFamily: "Inter-Regular"
-                            }
-                    });
-                    
-                    export default VistaQR;
+  const handleGenerateToken = async () => {
+    if (!user) {
+      Alert.alert('Error', 'Debes iniciar sesión para generar un código QR');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await createAccessToken();
+      setToken(data.token);
+      setExpiresAt(data.expiresAt);
+      setTimeRemaining(QR_EXPIRY_SECONDS);
+    } catch (error: any) {
+      // Extract the error message from Firebase error
+      let message = 'No se pudo generar el código QR';
+      
+      if (error.code === 'functions/resource-exhausted') {
+        // Rate limit error - show the custom message from backend
+        message = error.message;
+      } else if (error.message) {
+        message = error.message;
+      }
+      
+      Alert.alert('Error', message);
+      console.error('[QrScreen] Error generating token:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.backButtonText}>←</Text>
+          </Pressable>
+          <Text style={styles.headerTitle}>Código de asistencia</Text>
+        </View>
+
+        {/* Timer Card */}
+        <View style={styles.card}>
+          <Text style={styles.timerLabel}>Tiempo restante para expiración</Text>
+          <Text style={styles.timerValue}>{formatTime(timeRemaining)}</Text>
+        </View>
+
+        {/* QR Code Card */}
+        <View style={styles.qrCard}>
+          <Text style={styles.qrTitle}>Tu código de asistencia</Text>
+
+          <View style={styles.qrContainer}>
+            {loading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#009951" />
+                <Text style={styles.loadingText}>
+                  {!authChecked ? 'Verificando sesión...' : 'Generando código...'}
+                </Text>
+              </View>
+            )}
+
+            {!loading && token && (
+              <QrDisplay value={token} />
+            )}
+
+            {!loading && !token && user && (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  Presiona el botón para generar tu código QR
+                </Text>
+              </View>
+            )}
+
+            {!loading && !user && (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  Debes iniciar sesión para generar un código QR
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <Text style={styles.instructions}>
+            Presenta este código al guardia para registrar tu asistencia
+          </Text>
+        </View>
+
+        {/* Renew Button */}
+        <Pressable
+          style={[styles.button, (loading || !user) && styles.buttonDisabled]}
+          onPress={handleGenerateToken}
+          disabled={loading || !user}
+        >
+          <Text style={styles.buttonText}>
+            {token ? 'Renovar código QR' : 'Generar código QR'}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 28,
+    color: '#02542d',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-Regular',
+    color: '#02542d',
+    marginLeft: 8,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#d9d9d9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  timerLabel: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#1e1e1e',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  timerValue: {
+    fontSize: 24,
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
+    color: '#009951',
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  qrCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#d9d9d9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  qrTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-Regular',
+    color: '#1e1e1e',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  qrContainer: {
+    minHeight: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Inter-Regular',
+  },
+  emptyContainer: {
+    padding: 40,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    fontFamily: 'Inter-Regular',
+  },
+  instructions: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#1e1e1e',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  button: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#14ae5c',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#1e1e1e',
+  },
+});
+
+export default QrScreen;
+
                     

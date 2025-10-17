@@ -6,6 +6,7 @@ const { Timestamp } = require('firebase-admin/firestore');
 const QR_TOKEN_LENGTH = 12;
 const QR_EXPIRY_SECONDS = 300; // 5 minutes
 const MAX_USES_PER_TOKEN = 1;
+const COOLDOWN_SECONDS = 240; // 4 minutes - prevents spam while allowing early renewal
 
 /**
  * Generates a cryptographically secure random token
@@ -59,6 +60,35 @@ exports.createAccessToken = onCall(
           'permission-denied',
           'Only volunteers can generate access tokens.'
         );
+      }
+
+      // Rate limiting: Check if user generated a QR code too recently
+      const lastQRQuery = await db.collection('qrCodes')
+        .where('createdBy', '==', uid)
+        .orderBy('createdAt', 'desc')
+        .limit(1)
+        .get();
+
+      if (!lastQRQuery.empty) {
+        const lastQRData = lastQRQuery.docs[0].data();
+        const lastQRTime = lastQRData.createdAt.toMillis();
+        const timeSinceLastQR = Date.now() - lastQRTime;
+        const cooldownMs = COOLDOWN_SECONDS * 1000;
+
+        if (timeSinceLastQR < cooldownMs) {
+          const remainingSeconds = Math.ceil((cooldownMs - timeSinceLastQR) / 1000);
+          const minutes = Math.floor(remainingSeconds / 60);
+          const seconds = remainingSeconds % 60;
+          
+          const timeMessage = minutes > 0 
+            ? `${minutes} minuto${minutes > 1 ? 's' : ''} y ${seconds} segundo${seconds !== 1 ? 's' : ''}`
+            : `${seconds} segundo${seconds !== 1 ? 's' : ''}`;
+
+          throw new HttpsError(
+            'resource-exhausted',
+            `Por favor espera ${timeMessage} antes de generar un nuevo código QR.`
+          );
+        }
       }
 
       // Create token in Firestore transaction
