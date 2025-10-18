@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Portal Voluntarios BAMX",
+    "slug": "portal-voluntarios-bamx",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,8 +12,15 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bamx.portal-voluntarios",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta aplicación usa la cámara para escanear códigos QR de identificación de voluntarios.",
+        "NSPhotoLibraryUsageDescription": "Esta aplicación accede a tus fotos para subir documentos de identificación.",
+        "NSFaceIDUsageDescription": "Esta aplicación puede usar Face ID para proteger tu información de login de forma segura."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,14 +28,35 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.bamx.portal_voluntarios",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font",
-      "expo-barcode-scanner"
+      "expo-barcode-scanner",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Esta aplicación usa la cámara para escanear códigos QR de identificación de voluntarios.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Esta aplicación accede a tus fotos para subir documentos de identificación.",
+          "savePhotosPermission": false,
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ]
   }
 }

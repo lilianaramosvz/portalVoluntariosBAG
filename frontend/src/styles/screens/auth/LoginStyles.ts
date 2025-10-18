@@ -64,6 +64,10 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     backgroundColor: Colors.white,
   },
+  inputError: {
+    borderColor: Colors.secondary,
+    borderWidth: 2,
+  },
   error: {
     color: Colors.secondary,
     marginBottom: 10,
