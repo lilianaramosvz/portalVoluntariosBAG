@@ -1,3 +1,5 @@
+//frontend\src\styles\screens\voluntario\DashboardStyles.ts
+
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
 import { typography } from "../../typography";
@@ -28,17 +30,18 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.white,
     borderRadius: 16,
-    elevation: 3,
-    shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    padding: 25,
+    flex: 1,
     marginVertical: 10,
-    padding: 30,
+    marginBottom: 30,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 25,
+    paddingHorizontal: 20,
+    elevation: 3,
+    borderWidth: 0.05,
+    borderColor: Colors.lightGray,
   },
+
   name: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 18,
@@ -53,7 +56,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderColor: Colors.lightBrown,
+    borderColor: Colors.lightGray,
     borderWidth: 1,
   },
   estado: {
@@ -85,6 +88,51 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 5,
     marginTop: -5,
+  },
+  buttonQR: {
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary,
+    width: "100%",
+    elevation: 3,
+  },
+  button: {
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.white,
+    width: "100%",
+    elevation: 3,
+  },
+  buttonTextQR: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    color: Colors.white,
+    shadowOpacity: 0.05,
+    marginLeft: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+  },
+
+  buttonText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    color: Colors.text,
+    shadowOpacity: 0.05,
+    shadowColor: "#000",
+    marginLeft: 10,
+    shadowOffset: { width: 0, height: 2 },
   },
 });
 

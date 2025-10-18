@@ -1,15 +1,18 @@
 // frontend/src/services/api.ts
 
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from './firebaseConfig';
 
 const db = getFirestore(app);
+const functions = getFunctions(app);
 
 export interface UserData {
   id: string;
   email: string;
   name: string;
-  rol: 'voluntario' | 'admin' | 'guardia' | 'superadmin';
+  rol?: 'voluntario' | 'admin' | 'guardia' | 'superadmin'; // Opcional, ya que el rol viene del token
   // Campos opcionales para voluntarios
   contactoEmergencia?: string;
   isActive?: boolean;
@@ -56,7 +59,7 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
         id: uid,
         email: data.email || userEmail || '',
         name: data.nombre || data.name || 'Usuario', // Tu estructura usa 'nombre'
-        rol: data.rol || data.role || 'voluntario',
+        // rol: el rol ahora viene del token JWT (customClaims), no de Firestore
         // Campos opcionales para voluntarios (no afectará a admins que no los tengan)
         contactoEmergencia: data.contactoEmergencia,
         curp: data.curp,
@@ -97,5 +100,112 @@ export const updateUserRole = async (uid: string, newRole: 'voluntario' | 'admin
   } catch (error) {
     console.error('Error actualizando rol del usuario:', error);
     throw error;
+  }
+};
+
+// Obtener el rol actual del usuario desde customClaims
+export const getCurrentUserRole = async (): Promise<string | null> => {
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      return null;
+    }
+    
+    const idTokenResult = await user.getIdTokenResult();
+    return idTokenResult.claims.role as string || null;
+  } catch (error) {
+    console.error('Error obteniendo rol del usuario:', error);
+    return null;
+  }
+};
+
+// Función para solicitar cambio de rol (usa Cloud Function)
+export const requestRoleChange = async (
+  targetUserId: string, 
+  newRole: 'voluntario' | 'admin' | 'guardia' | 'superadmin'
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      return { success: false, message: 'Usuario no autenticado' };
+    }
+    
+    // Llamar a la Cloud Function
+    const setUserRole = httpsCallable(functions, 'setUserRole');
+    const result = await setUserRole({
+      targetUserId,
+      newRole
+    });
+    
+    const data = result.data as { success: boolean; message: string };
+    
+    return { 
+      success: true, 
+      message: data.message || `Rol ${newRole} asignado correctamente` 
+    };
+  } catch (error: any) {
+    console.error('Error solicitando cambio de rol:', error);
+    
+    let message = 'Error interno al cambiar rol';
+    if (error.code === 'functions/permission-denied') {
+      message = 'No tienes permisos para realizar esta acción';
+    } else if (error.code === 'functions/invalid-argument') {
+      message = 'Datos inválidos proporcionados';
+    } else if (error.code === 'functions/unauthenticated') {
+      message = 'Debes estar autenticado para realizar esta acción';
+    } else if (error.message) {
+      message = error.message;
+    }
+    
+    return { success: false, message };
+  }
+};
+
+// Refrescar el token para obtener los customClaims actualizados
+export const refreshUserToken = async (): Promise<boolean> => {
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      return false;
+    }
+    
+    // Forzar refresh del token para obtener customClaims actualizados
+    await user.getIdToken(true);
+    return true;
+  } catch (error) {
+    console.error('Error refrescando token:', error);
+    return false;
+  }
+};
+
+// Obtener información detallada de un usuario (para admins)
+export const getDetailedUserInfo = async (targetUserId: string): Promise<any> => {
+  try {
+    const getUserInfo = httpsCallable(functions, 'getUserInfo');
+    const result = await getUserInfo({ targetUserId });
+    
+    return result.data;
+  } catch (error: any) {
+    console.error('Error obteniendo información del usuario:', error);
+    throw new Error(error.message || 'Error al obtener información del usuario');
+  }
+};
+
+// Listar todos los usuarios (para admins)
+export const listAllUsers = async (maxResults: number = 100, nextPageToken?: string): Promise<any> => {
+  try {
+    const listUsers = httpsCallable(functions, 'listUsers');
+    const result = await listUsers({ maxResults, nextPageToken });
+    
+    return result.data;
+  } catch (error: any) {
+    console.error('Error listando usuarios:', error);
+    throw new Error(error.message || 'Error al listar usuarios');
   }
 };
