@@ -1,3 +1,5 @@
+//frontend\src\styles\screens\voluntario\DashboardStyles.ts
+
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
 import { typography } from "../../typography";
@@ -25,19 +27,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 30,
   },
-  card: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    elevation: 3,
-    shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+card: {
+    backgroundColor: Colors.white, 
+    borderRadius: 20,
+    padding: 35,
+    flex: 1,
     marginVertical: 10,
-    padding: 30,
+    marginBottom: 25,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 25,
+    paddingHorizontal: 20, 
+    elevation: 3,
   },
   name: {
     fontFamily: "Inter_600SemiBold",
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   estadoVoluntario: {
     alignItems: "center",
-    backgroundColor: Colors.tertiary,
+    backgroundColor: Colors.tertiary, 
     borderRadius: 8,
     elevation: 2,
     marginTop: 15,

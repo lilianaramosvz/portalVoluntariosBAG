@@ -179,7 +179,12 @@ const SolicitudesScreen: React.FC = () => {
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>
               {item.nombre}
-              <AntDesign name="down" size={13} color="colors.text" style={{ padding: 90 }} />
+              <AntDesign
+                name="down"
+                size={13}
+                color="colors.text"
+                style={{ padding: 90 }}
+              />
             </Text>
             <Text style={styles.cardSubtitle}>{item.email}</Text>
           </View>
@@ -247,7 +252,7 @@ const SolicitudesScreen: React.FC = () => {
       const batch = writeBatch(db);
       batch.set(dstRef, {
         ...data,
-        estado: "registrado",
+        estado: "aceptado", 
         fechaRegistro: serverTimestamp(),
       });
       batch.delete(srcRef);
