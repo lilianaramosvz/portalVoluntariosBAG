@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     paddingVertical: 10,
     borderRadius: 8,
-    marginBottom: 15,
+    marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     paddingVertical: 10,
     borderRadius: 8,
-    marginBottom: 15,
+    marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -124,7 +124,6 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
   },
-
   buttonText: {
     fontFamily: "Inter_500Medium",
     fontSize: 13,
