@@ -86,6 +86,9 @@ exports.redeemAccessToken = onCall(
 
         // Validate token not expired
         if (tokenData.expiresAt.toMillis() < now.toMillis()) {
+          // ✅ DELETE expired token
+          transaction.delete(tokenRef);
+          console.log('[redeemAccessToken] Expired token deleted');
           throw new HttpsError('failed-precondition', 'Token has expired.');
         }
 
@@ -101,20 +104,35 @@ exports.redeemAccessToken = onCall(
 
         // Now do the write operations
         const newUsedCount = tokenData.usedCount + 1;
-        const updates = {
-          usedCount: newUsedCount,
-          lastUsedAt: now,
-          lastUsedBy: uid,
-        };
-
-        // Deactivate if max uses reached
+        
+        // If this is the last use, delete the token instead of updating it
         if (newUsedCount >= tokenData.maxUses) {
-          updates.active = false;
+          //  DELETE the QR token (no longer needed)
+          transaction.delete(tokenRef);
+          console.log('[redeemAccessToken] Token deleted (max uses reached)');
+        } else {
+          // Update token if there are remaining uses
+          const updates = {
+            usedCount: newUsedCount,
+            lastUsedAt: now,
+            lastUsedBy: uid,
+            active: newUsedCount < tokenData.maxUses, // Deactivate if max uses reached
+          };
+          transaction.update(tokenRef, updates);
         }
 
-        transaction.update(tokenRef, updates);
+        //  CREATE ATTENDANCE RECORD
+        const asistenciaRef = db.collection('RegistroAsistencias').doc();
+        transaction.set(asistenciaRef, {
+          voluntarioId: tokenData.createdBy,
+          voluntarioNombre: volunteerDoc.exists ? volunteerDoc.data().nombre : 'Desconocido',
+          voluntarioEmail: volunteerDoc.exists ? (volunteerDoc.data().correo || volunteerDoc.data().email) : null,
+          fecha: now,
+          registradoPor: uid,
+        });
 
         console.log('[redeemAccessToken] Token redeemed successfully');
+        console.log('[redeemAccessToken] Attendance record created:', asistenciaRef.id);
 
         return {
           success: true,
@@ -126,6 +144,7 @@ exports.redeemAccessToken = onCall(
           } : null,
           redeemedAt: now.toMillis(),
           remainingUses: tokenData.maxUses - newUsedCount,
+          asistenciaId: asistenciaRef.id, // Return attendance ID
         };
       });
 
