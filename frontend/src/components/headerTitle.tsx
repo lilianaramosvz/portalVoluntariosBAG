@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     color: Colors.green,
     fontFamily: "Inter_400Regular",
     paddingLeft: 10,
+    textAlign: 'left',
   },
   actionButton: {
     borderRadius: 20,
