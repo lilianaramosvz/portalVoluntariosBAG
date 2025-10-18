@@ -160,7 +160,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           email: userData.email,
           name: userData.name,
           role: userRole, // Usar rol desde customClaims
-          isActive: userData.isActive || false
+          isActive: userData.isActive !== undefined ? userData.isActive : false
         });
         return true;
       } else {
@@ -175,7 +175,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           });
           return true;
         } else {
-          setLoginError('Tu cuenta no está registrada en nuestro sistema. Contacta al administrador.');
+          // Usuario registrado pero no aprobado aún
+          setLoginError('Tu cuenta está pendiente de aprobación por un administrador.');
+          await signOut(auth); // Hacer logout para evitar estado inconsistente
           return false;
         }
       }
