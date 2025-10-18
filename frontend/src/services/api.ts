@@ -34,15 +34,23 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
     console.log(`=== INICIO getUserData ===`);
     console.log(`UID recibido: "${uid}"`);
     console.log(`Email recibido: "${userEmail}"`);
-    console.log(`Buscando en colección: "Usuarios"`); // Cambiado de "users" a "Usuarios"
+    console.log(`Buscando en colección: "Usuarios"`);
     console.log(`Documento ID: "${uid}"`);
     
-    // Intentar obtener el documento del usuario - CORREGIDO: usar "Usuarios" en lugar de "users"
+    // Intentar obtener el documento del usuario en Usuarios
     const docRef = doc(db, 'Usuarios', uid);
     console.log('Referencia del documento creada:', docRef.path);
     
-    const userDoc = await getDoc(docRef);
-    console.log('Documento obtenido, existe?:', userDoc.exists());
+    let userDoc = await getDoc(docRef);
+    console.log('Documento obtenido en Usuarios, existe?:', userDoc.exists());
+    
+    // Si no existe en Usuarios, buscar en voluntariosPendientes
+    if (!userDoc.exists()) {
+      console.log('Buscando en colección: "voluntariosPendientes"');
+      const pendienteDocRef = doc(db, 'voluntariosPendientes', uid);
+      userDoc = await getDoc(pendienteDocRef);
+      console.log('Documento obtenido en voluntariosPendientes, existe?:', userDoc.exists());
+    }
     
     if (userDoc.exists()) {
       const data = userDoc.data();
@@ -53,15 +61,15 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
       console.log('Campo "nombre":', data.nombre);
       console.log('Campo "email":', data.email);
       console.log('Campo "rol":', data.rol);
+      console.log('Campo "isActive":', data.isActive);
       
       // Crear el objeto UserData con todos los campos disponibles
       const userData: UserData = {
         id: uid,
         email: data.email || userEmail || '',
-        name: data.nombre || data.name || 'Usuario', // Tu estructura usa 'nombre'
-        // rol: el rol ahora viene del token JWT (customClaims), no de Firestore
-        // Campos opcionales para voluntarios (no afectará a admins que no los tengan)
+        name: data.nombre || data.name || 'Usuario',
         contactoEmergencia: data.contactoEmergencia,
+        isActive: data.isActive,
         curp: data.curp,
         discapacidad: data.discapacidad,
         documentos: data.documentos,
@@ -77,10 +85,7 @@ export const getUserData = async (uid: string, userEmail?: string): Promise<User
       return userData;
     } else {
       console.log('=== DOCUMENTO NO ENCONTRADO ===');
-      console.log(`No se encontró documento con ID: "${uid}" en la colección "Usuarios"`); // Cambiado de "users"
-      
-      // Intentar listar algunos documentos para debug
-      console.log('Verificando conexión a Firestore...');
+      console.log(`No se encontró documento con ID: "${uid}" en ninguna colección`);
       return null;
     }
   } catch (error) {

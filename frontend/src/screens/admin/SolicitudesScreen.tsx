@@ -253,6 +253,7 @@ const SolicitudesScreen: React.FC = () => {
       const batch = writeBatch(db);
       batch.set(dstRef, {
         ...data,
+        isActive: true, // Activar el usuario
         estado: "aceptado",
         fechaRegistro: serverTimestamp(),
       });

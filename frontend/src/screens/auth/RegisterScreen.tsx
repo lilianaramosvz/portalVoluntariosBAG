@@ -258,7 +258,7 @@ const RegisterScreen: React.FC = () => {
       const addressFileUrl = await uploadFile(addressFile, "comprobante" + (addressFile ? addressFile.name.substring(addressFile.name.lastIndexOf('.')) : ''));
 
       // Guardar datos en Firestore
-      await setDoc(doc(db, "Usuarios", user.uid), {
+      await setDoc(doc(db, "voluntariosPendientes", user.uid), {
         nombre: name,
         curp: curp,
         email: email,
@@ -274,7 +274,8 @@ const RegisterScreen: React.FC = () => {
           ine: ineFileUrl, 
           comprobanteDomicilio: addressFileUrl, 
         },
-        isActive: false // Inactivo hasta que admin apruebe
+        isActive: false, // Inactivo hasta que admin apruebe
+        estado: "pendiente"
       });
 
       // Logout DESPUÉS de subir archivos y guardar datos

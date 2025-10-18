@@ -52,8 +52,13 @@ const DashboardScreen: React.FC = () => {
           setLoading(true);
           setError(null);
 
-          // Leer de la colección 'Usuarios' (mayúscula)
-          const userDoc = await getDoc(doc(db, "Usuarios", currentUser.uid));
+          // Intentar leer de la colección 'Usuarios' primero
+          let userDoc = await getDoc(doc(db, "Usuarios", currentUser.uid));
+
+          // Si no existe en Usuarios, buscar en voluntariosPendientes
+          if (!userDoc.exists()) {
+            userDoc = await getDoc(doc(db, "voluntariosPendientes", currentUser.uid));
+          }
 
           if (!userDoc.exists()) {
             setError("Perfil no encontrado");
