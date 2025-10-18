@@ -10,6 +10,8 @@ import { getFunctions } from 'firebase/functions';
 // CONFIGURACIÓN DE FIREBASE DESDE .env
 // ============================================
 // Nota: En Expo, las variables de entorno deben comenzar con EXPO_PUBLIC_
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -75,3 +77,11 @@ export {
   storage, 
   functions 
 };
+// Inicializa Firebase y exporta la instancia de la app
+export const app = initializeApp(firebaseConfig);
+
+// Inicializa App Check con reCAPTCHA v3
+export const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider("6LfN_u0rAAAAAN8l7XQEiG6Gjo4q6Cv_L0NSTvih"), // Clave del sitio reCAPTCHA v3
+  isTokenAutoRefreshEnabled: true, // Mantiene el token actualizado automáticamente
+});
