@@ -1,6 +1,6 @@
 // frontend/src/screens/voluntario/DashboardScreen.tsx
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,25 +8,25 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-} from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { doc, getDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { auth, db } from '../../services/firebaseConfig';
-import { HeaderLogout } from '../../components/headerTitle';
-import { Colors } from '../../styles/colors';
-import { typography } from '../../styles/typography';
-import styles from '../../styles/screens/voluntario/DashboardStyles';
+} from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { doc, getDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { auth, db } from "../../services/firebaseConfig";
+import { HeaderLogout } from "../../components/headerTitle";
+import { Colors } from "../../styles/colors";
+import { typography } from "../../styles/typography";
+import styles from "../../styles/screens/voluntario/DashboardStyles";
 
-type DashboardScreenProp = StackNavigationProp<any, 'Dashboard'>;
+type DashboardScreenProp = StackNavigationProp<any, "Dashboard">;
 
 interface UsuarioData {
   nombre: string;
   email: string;
-  rol: 'voluntario' | 'guardia' | 'admin';
-  estado: 'pendiente' | 'aceptado';
+  rol: "voluntario" | "guardia" | "admin";
+  estado: "pendiente" | "aceptado";
   createdAt?: string;
 }
 
@@ -43,7 +43,7 @@ const DashboardScreen: React.FC = () => {
     React.useCallback(() => {
       const fetchUserData = async () => {
         if (!currentUser) {
-          setError('No hay usuario autenticado');
+          setError("No hay usuario autenticado");
           setLoading(false);
           return;
         }
@@ -53,10 +53,10 @@ const DashboardScreen: React.FC = () => {
           setError(null);
 
           // Leer de la colección 'Usuarios' (mayúscula)
-          const userDoc = await getDoc(doc(db, 'Usuarios', currentUser.uid));
+          const userDoc = await getDoc(doc(db, "Usuarios", currentUser.uid));
 
           if (!userDoc.exists()) {
-            setError('Perfil no encontrado');
+            setError("Perfil no encontrado");
             setLoading(false);
             return;
           }
@@ -65,8 +65,8 @@ const DashboardScreen: React.FC = () => {
           setUserData(data);
           setLoading(false);
         } catch (err) {
-          console.error('Error al cargar datos:', err);
-          setError('Error al cargar tus datos');
+          console.error("Error al cargar datos:", err);
+          setError("Error al cargar tus datos");
           setLoading(false);
         }
       };
@@ -77,22 +77,22 @@ const DashboardScreen: React.FC = () => {
 
   const handleLogout = () => {
     Alert.alert(
-      'Cerrar sesión',
-      '¿Estás seguro de que quieres cerrar sesión?',
+      "Cerrar sesión",
+      "¿Estás seguro de que quieres cerrar sesión?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Cerrar sesión',
-          style: 'destructive',
+          text: "Cerrar sesión",
+          style: "destructive",
           onPress: async () => {
             try {
               await getAuth().signOut();
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' }],
+                routes: [{ name: "Login" }],
               });
             } catch (error) {
-              Alert.alert('Error', 'No se pudo cerrar sesión');
+              Alert.alert("Error", "No se pudo cerrar sesión");
             }
           },
         },
@@ -105,7 +105,9 @@ const DashboardScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <HeaderLogout title="" onLogout={handleLogout} />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={[styles.subtitle, { marginTop: 15 }]}>
             Cargando tu perfil...
@@ -120,11 +122,17 @@ const DashboardScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <HeaderLogout title="" onLogout={handleLogout} />
-        <ScrollView contentContainerStyle={{ flex: 1, justifyContent: 'center' }}>
-          <View style={{ alignItems: 'center', paddingHorizontal: 20 }}>
-            <MaterialIcons name="error-outline" size={60} color={Colors.secondary} />
+        <ScrollView
+          contentContainerStyle={{ flex: 1, justifyContent: "center" }}
+        >
+          <View style={{ alignItems: "center", paddingHorizontal: 20 }}>
+            <MaterialIcons
+              name="error-outline"
+              size={60}
+              color={Colors.secondary}
+            />
             <Text style={[styles.subtitle, { marginTop: 20, marginBottom: 0 }]}>
-              {error || 'Error al cargar tu perfil'}
+              {error || "Error al cargar tu perfil"}
             </Text>
             <TouchableOpacity
               style={{
@@ -141,8 +149,8 @@ const DashboardScreen: React.FC = () => {
             >
               <Text
                 style={{
-                  color: 'white',
-                  fontFamily: 'Inter_600SemiBold',
+                  color: "white",
+                  fontFamily: "Inter_600SemiBold",
                   fontSize: 16,
                 }}
               >
@@ -156,9 +164,9 @@ const DashboardScreen: React.FC = () => {
   }
 
   // Determinar si está aprobado
-  const isAprobado = userData.estado === 'aceptado' ;
-  const estadoColor = isAprobado ? Colors.primary : Colors.tertiary;
-  const estadoTexto = isAprobado ? 'Aceptado' : 'Pendiente';
+  const isAprobado = userData.estado === "aceptado";
+  const estadoColor = isAprobado ? Colors.lightGreen : Colors.tertiary;
+  const estadoTexto = isAprobado ? "Aceptado" : "Pendiente";
 
   return (
     <View style={styles.container}>
@@ -171,17 +179,28 @@ const DashboardScreen: React.FC = () => {
 
         {/* Tarjeta del perfil */}
         <View style={styles.card}>
-          <MaterialIcons name="account-circle" size={90} color={Colors.purple} />
-          <Text style={styles.name}>{userData.nombre || 'Voluntario'}</Text>
+          <MaterialIcons
+            name="account-circle"
+            size={90}
+            color={Colors.purple}
+          />
+          <Text style={styles.name}>{userData.nombre || "Voluntario"}</Text>
 
-          <View style={[styles.estadoVoluntario, { backgroundColor: estadoColor }]}>
-            <Text style={[styles.estado, { color: Colors.text }]}>
+          <View
+            style={[styles.estadoVoluntario, { backgroundColor: estadoColor }]}
+          >
+            <Text style={[styles.estado, { fontFamily: "Inter_400Regular", color: Colors.text }]}>
               {estadoTexto}
             </Text>
           </View>
 
-          <Text style={[styles.estado, { marginTop: 10, fontSize: 11, color: Colors.gray }]}>
-            ID: {currentUser?.uid?.substring(0, 8) || '...'}
+          <Text
+            style={[
+              styles.estado,
+              { fontFamily: "Inter_400Regular", marginTop: 10, fontSize: 11, color: Colors.gray },
+            ]}
+          >
+            ID: {currentUser?.uid?.substring(0, 8) || "..."}
           </Text>
         </View>
 
@@ -191,8 +210,8 @@ const DashboardScreen: React.FC = () => {
             <View style={styles.avisoCard}>
               <Text style={styles.avisoText}>Solicitud pendiente</Text>
               <Text style={styles.subtituloAviso}>
-                Tu solicitud está siendo revisada por nuestro equipo. Te notificaremos
-                cuando sea aprobada.
+                Tu solicitud está siendo revisada por nuestro equipo. Te
+                notificaremos cuando sea aprobada.
               </Text>
             </View>
           </View>
@@ -203,66 +222,20 @@ const DashboardScreen: React.FC = () => {
           <View style={{ marginTop: 16, gap: 12 }}>
             {/* Botón Verde - Ver QR */}
             <TouchableOpacity
-              style={[
-                styles.card,
-                {
-                  marginVertical: 0,
-                  backgroundColor: Colors.primary,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                },
-              ]}
-              onPress={() => navigation.navigate('QR')}
+              style={styles.buttonQR}
+              onPress={() => navigation.navigate("QR")}
             >
               <MaterialIcons name="qr-code-2" size={24} color={Colors.white} />
-              <Text
-                style={[
-                  styles.name,
-                  {
-                    color: Colors.white,
-                    marginLeft: 12,
-                    marginTop: 0,
-                    fontSize: 16,
-                  },
-                ]}
-              >
-                Ver código QR
-              </Text>
+              <Text style={styles.buttonTextQR}>Ver código QR</Text>
             </TouchableOpacity>
 
             {/* Botón Outline - Historial */}
             <TouchableOpacity
-              style={[
-                styles.card,
-                {
-                  marginVertical: 0,
-                  backgroundColor: Colors.white,
-                  borderWidth: 2,
-                  borderColor: Colors.primary,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingVertical: 16,
-                },
-              ]}
-              onPress={() => navigation.navigate('Historial')}
+              style={styles.button}
+              onPress={() => navigation.navigate("Historial")}
             >
               <MaterialIcons name="history" size={24} color={Colors.primary} />
-              <Text
-                style={[
-                  styles.name,
-                  {
-                    color: Colors.primary,
-                    marginLeft: 12,
-                    marginTop: 0,
-                    fontSize: 16,
-                  },
-                ]}
-              >
-                Historial de asistencias
-              </Text>
+              <Text style={styles.buttonText}>Historial de asistencias</Text>
             </TouchableOpacity>
           </View>
         )}

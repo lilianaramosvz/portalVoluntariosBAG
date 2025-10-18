@@ -178,14 +178,15 @@ const SolicitudesScreen: React.FC = () => {
         >
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>
-              {item.nombre}
+              {item.nombre}{" "}
               <AntDesign
                 name="down"
-                size={13}
+                size={12}
                 color="colors.text"
-                style={{ padding: 90 }}
+               style={{ padding: 5 }}
               />
             </Text>
+
             <Text style={styles.cardSubtitle}>{item.email}</Text>
           </View>
         </TouchableOpacity>
@@ -252,7 +253,7 @@ const SolicitudesScreen: React.FC = () => {
       const batch = writeBatch(db);
       batch.set(dstRef, {
         ...data,
-        estado: "aceptado", 
+        estado: "aceptado",
         fechaRegistro: serverTimestamp(),
       });
       batch.delete(srcRef);
@@ -361,7 +362,7 @@ const SolicitudesScreen: React.FC = () => {
                 </View>
               ) : (
                 <ScrollView showsVerticalScrollIndicator={false}>
-                  <View style={{ marginBottom: 5 }}>
+                  <View style={{ marginBottom: 7 }}>
                     {[
                       ["Nombre completo", selectedVoluntario?.nombre],
                       ["Correo electrónico", selectedVoluntario?.email],
