@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
   },
   container: {
     padding: 35,
-    paddingBottom: 30,
+    paddingBottom: 25,
   },
   divisorline: {
     height: 1,
@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.text,
   },
   cardSubtitle: {
@@ -226,7 +226,7 @@ export const styles = StyleSheet.create({
     lineHeight: 15,
   },
   nombreText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Inter_600SemiBold",
     color: Colors.text,
     marginBottom: 2,
