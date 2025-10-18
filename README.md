@@ -16,7 +16,6 @@ La aplicación permite a distintos tipos de usuarios interactuar con el sistema 
   - **Voluntarios:** Dashboard personal, generación de códigos QR para registro en actividades.  
   - **Guardias:** Escaneo de QR para registrar accesos de voluntarios de manera rápida y segura.  
   - **Administradores:** Gestión de solicitudes, seguimiento de voluntarios y supervisión de actividades.  
-  - **Super Administradores:** Creación y gestión de cuentas, administración completa de la plataforma.  
 
 - **Gestión de voluntarios:** Seguimiento detallado de participación y registro de actividades.  
 - **Interfaz intuitiva:** Diseño simple y accesible para todos los usuarios.  
