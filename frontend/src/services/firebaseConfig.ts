@@ -25,10 +25,11 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 
 export const app = initializeApp(firebaseConfig);
 
-export const appCheck = initializeAppCheck(app, {
+/*export const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider("6LfN_u0rAAAAAN8l7XQEiG6Gjo4q6Cv_L0NSTvih"), // tu clave pública
   isTokenAutoRefreshEnabled: true,
 });
+*/
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
