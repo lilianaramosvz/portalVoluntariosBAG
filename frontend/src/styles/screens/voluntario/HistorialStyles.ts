@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
   },
   formEntrada: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingVertical: 5,
     paddingHorizontal: 15,
     alignItems: "center",
