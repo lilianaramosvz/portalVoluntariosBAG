@@ -281,7 +281,7 @@ const RegisterScreen: React.FC = () => {
       // Logout DESPUÉS de subir archivos y guardar datos
       await signOut(auth);
 
-      alert("¡Registro completado con éxito! Tu cuenta está pendiente de aprobación. Recibirás un correo cuando sea aprobada.");
+      alert("¡Registro completado con éxito! Tu cuenta está pendiente de aprobación.");
       navigation.navigate("Login");
 
     } catch (error: any) {
