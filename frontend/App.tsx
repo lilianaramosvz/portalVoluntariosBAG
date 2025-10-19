@@ -1,26 +1,14 @@
-//frontend\App.tsx
+// frontend/App.tsx
 
+import React, { useState, useEffect } from "react";
+import { View, Image, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Image } from "react-native";
-import React, { useState } from "react";
-import AppLoading from "expo-app-loading";
-import { NavigationContainer } from "@react-navigation/native";
-import {
-  useFonts,
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from "@expo-google-fonts/inter";
-
-import LoginScreen from "./src/screens/auth/LoginScreen";
-import AuthNavigator from "./src/navigation/AuthNavigator";
-import AppNavigator from "./src/AppNavigator";
-import { useEffect } from "react";
+import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from "@expo-google-fonts/inter";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from "./src/context/AuthContext";
+import AppNavigator from "./src/AppNavigator";
 
 export default function App() {
-  //carga de las fuentes
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -28,18 +16,16 @@ export default function App() {
     Inter_700Bold,
   });
 
+  // Your splash screen logic is fine, no changes needed here
   const [showSplash, setShowSplash] = useState(true);
-
   useEffect(() => {
     if (fontsLoaded) {
-      const timer = setTimeout(() => {
-        setShowSplash(false);
-      }, 1000); // 1 segundo extra
+      const timer = setTimeout(() => setShowSplash(false), 1000);
       return () => clearTimeout(timer);
     }
   }, [fontsLoaded]);
 
-  if (showSplash) {
+  if (!fontsLoaded || showSplash) {
     return (
       <View style={styles.splashContainer}>
         <Image
@@ -51,23 +37,18 @@ export default function App() {
     );
   }
 
+  // This is the correct structure
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <View style={styles.container}>
-          <AppNavigator />
-          <StatusBar style="auto" />
-        </View>
-      </NavigationContainer>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <StatusBar style="auto" />
+        <AppNavigator />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
   splashContainer: {
     flex: 1,
     backgroundColor: "#fff",

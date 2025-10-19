@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     fontSize: 18,
     marginTop: 8,
+    textAlign: "center",
     color: Colors.text,
   },
   estadoVoluntario: {
