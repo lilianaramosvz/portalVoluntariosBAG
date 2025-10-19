@@ -1,11 +1,20 @@
+//frontend\src\screens\voluntario\HistorialScreen.tsx
+
 import React, { useState, useEffect } from "react";
-import { View, Text, SafeAreaView, ScrollView, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { styles } from "../../styles/screens/voluntario/HistorialStyles";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { HeaderBack } from "../../components/headerTitle";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../../services/firebaseConfig";
+import { Colors } from "../../styles/colors";
 
 interface Asistencia {
   fecha: Date;
@@ -40,10 +49,7 @@ export default function HistorialScreen() {
 
       // Query para obtener las asistencias del voluntario actual
       const asistenciasRef = collection(db, "RegistroAsistencias");
-      const q = query(
-        asistenciasRef,
-        where("voluntarioId", "==", user.uid)
-      );
+      const q = query(asistenciasRef, where("voluntarioId", "==", user.uid));
 
       const querySnapshot = await getDocs(q);
       const asistencias: Asistencia[] = [];
@@ -116,8 +122,10 @@ export default function HistorialScreen() {
         <View style={styles.divisorline} />
 
         {loading ? (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <ActivityIndicator size="large" color="#4CAF50" />
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={[styles.description, { marginTop: 10 }]}>
               Cargando historial...
             </Text>
@@ -126,30 +134,65 @@ export default function HistorialScreen() {
           <>
             <View style={styles.form}>
               <Text style={styles.number}>{diasRegistrados}</Text>
-              <Text style={styles.description}>Días de voluntariado registrados</Text>
+              <Text style={styles.description}>
+                Días de voluntariado registrados
+              </Text>
             </View>
 
             <ScrollView style={styles.scrollContainer}>
               {historial.length === 0 ? (
-                <View style={{ padding: 20, alignItems: "center" }}>
-                  <Ionicons name="calendar-outline" size={48} color="#999" />
-                  <Text style={[styles.description, { marginTop: 10, textAlign: "center" }]}>
-                    No tienes asistencias registradas aún
+                <View
+                  style={{
+                    padding: 20,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons
+                    name="calendar-outline"
+                    size={48}
+                    color={Colors.lightGray}
+                  />
+                  <Text
+                    style={[
+                      styles.description,
+                      {
+                        marginTop: 10,
+                        textAlign: "center",
+                        justifyContent: "center",
+                      },
+                    ]}
+                  >
+                    Aún no tienes asistencias registradas
                   </Text>
                 </View>
               ) : (
                 historial.map((dia, index) => (
                   <View key={index} style={styles.formDia}>
                     <View style={styles.row}>
-                      <Ionicons name="calendar-clear-outline" size={18} style={styles.icon} />
-                      <Text style={[styles.description, { marginLeft: 5 }]}>{dia.fecha}</Text>
+                      <Ionicons
+                        name="calendar-clear-outline"
+                        size={18}
+                        style={styles.icon}
+                        marginRight={5}
+                      />
+                      <Text style={[styles.fecha, { marginLeft: 2 }]}>
+                        {dia.fecha}
+                      </Text>
                     </View>
                     {dia.entradas.map((entrada, idx) => (
                       <View key={idx} style={styles.formGray}>
                         <View style={styles.row}>
                           <View style={styles.rowLeft}>
-                            <Ionicons name="time-outline" size={18} style={styles.icon} />
-                            <Text style={[styles.hora, { marginLeft: 5 }]}>{entrada.hora}</Text>
+                            <Ionicons
+                              name="time-outline"
+                              size={18}
+                              color={Colors.text}
+                              weight="bold"
+                            />
+                            <Text style={[styles.hora, { marginLeft: 2 }]}>
+                              {entrada.hora}
+                            </Text>
                           </View>
                           <View style={styles.formEntrada}>
                             <Text style={styles.entrada}>{entrada.tipo}</Text>
@@ -160,14 +203,13 @@ export default function HistorialScreen() {
                   </View>
                 ))
               )}
+              {/* Última caja */}
+              <View style={styles.formGreen}>
+                <Text style={styles.titleGreen}>Estadísticas</Text>
+                <Text style={styles.number}>{totalEntradas}</Text>
+                <Text style={styles.subtitleGreen}>Total de Entradas</Text>
+              </View>
             </ScrollView>
-
-            {/* Última caja */}
-            <View style={styles.formGreen}>
-              <Text style={styles.titleGreen}>Estadísticas</Text>
-              <Text style={styles.number}>{totalEntradas}</Text>
-              <Text style={styles.subtitleGreen}>Total Entradas</Text>
-            </View>
           </>
         )}
       </View>
