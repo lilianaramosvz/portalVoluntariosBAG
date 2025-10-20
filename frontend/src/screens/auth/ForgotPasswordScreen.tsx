@@ -1,35 +1,57 @@
-//frontend\src\screens\auth\ForgotPasswordScreen.tsx
+// frontend/src/screens/auth/ForgotPasswordScreen.tsx
 
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { styles } from "../../styles/screens/auth/ForgotPasswordStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
 
-type ForgotPasswordScreenProp = StackNavigationProp<
-  RootStackParamList,
-  "Login"
->;
-
 const ForgotPasswordScreen: React.FC = () => {
-  const navigation = useNavigation<ForgotPasswordScreenProp>();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  function handleCodeSend() {
-    if (!email) {
-      alert("Por favor ingresa tu correo electrónico.");
+  const handlePasswordReset = async () => {
+    if (!email.trim()) {
+      Alert.alert("Campo vacío", "Por favor, ingresa tu correo electrónico.");
       return;
     }
-    // Simulate sending a password reset request
-    // Replace this with your actual API call
-    // Example:
-    // await sendPasswordResetEmail(email);
 
-    alert("Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña.");
-    navigation.goBack();
-  }
+    setLoading(true);
+    try {
+      const auth = getAuth();
+      // --- ESTA ES LA ÚNICA LÍNEA DE LÓGICA QUE NECESITAS ---
+      await sendPasswordResetEmail(auth, email);
+
+      Alert.alert(
+        "Revisa tu Correo",
+        "Se ha enviado un enlace a tu correo para restablecer la contraseña.",
+        // Al presionar OK, lo mandamos de vuelta al Login
+        [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+      );
+
+    } catch (error: any) {
+      console.error("Error al enviar correo de restablecimiento:", error);
+      if (error.code === 'auth/user-not-found') {
+        Alert.alert("Usuario no encontrado", "No existe una cuenta registrada con ese correo.");
+      } else {
+        Alert.alert("Error", "No se pudo enviar el correo. Inténtalo de nuevo.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -40,25 +62,36 @@ const ForgotPasswordScreen: React.FC = () => {
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Logo */}
-      <Image source={require("../../../assets/logo.png")} style={styles.logo} />
+      <Image
+        source={require("../../../assets/logo.png")}
+        style={styles.logo}
+      />
+      <Text style={styles.title}>Recuperar Contraseña</Text>
+      <Text style={styles.subtitle}>
+        Ingresa tu correo y te enviaremos un enlace para que la recuperes.
+      </Text>
 
-      <Text style={styles.title}>¿Olvidaste tu contraseña?</Text>
-      <Text style={styles.subtitle}>No te preocupes, la puedes recuperar.</Text>
-
-      <Text style={styles.label}>Ingresa tu correo electrónico:</Text>
+      <Text style={styles.label}>Correo electrónico:</Text>
       <TextInput
         style={styles.input}
         placeholder="tu@correo.com"
         keyboardType="email-address"
+        autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
-      <TouchableOpacity style={styles.registerButton} onPress={handleCodeSend}>
-        <Text style={styles.registerText}>Enviar código</Text>
-      </TouchableOpacity>
 
-      <Text style={styles.footer}>Te llegará un correo de verificación.</Text>
+      <TouchableOpacity
+        style={styles.registerButton}
+        onPress={handlePasswordReset}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.registerText}>Enviar Enlace</Text>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };

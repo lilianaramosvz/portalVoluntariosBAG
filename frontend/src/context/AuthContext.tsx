@@ -7,6 +7,7 @@ import { getUserData, UserData } from '../services/api';
 import { SecureTokenStorage } from '../services/secureStorage';
 import { SecureErrorHandler } from '../utils/errorHandler';
 import { validateEmail } from '../utils/validators';
+import { doc, getDoc } from 'firebase/firestore';
 
 type UserRole = 'voluntario' | 'admin' | 'guardia' | 'superadmin';
 
@@ -225,4 +226,14 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+
+
+export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  AvisoPrivacidad: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { email: string}; 
 };
