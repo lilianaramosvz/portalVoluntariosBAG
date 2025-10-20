@@ -20,6 +20,7 @@ import { Colors } from "../../styles/colors";
 import { typography } from "../../styles/typography";
 import styles from "../../styles/screens/voluntario/DashboardStyles";
 import { useAuth } from "../../context/AuthContext";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 type DashboardScreenProp = StackNavigationProp<any, "Dashboard">;
 
@@ -58,7 +59,9 @@ const DashboardScreen: React.FC = () => {
 
           // Si no existe en Usuarios, buscar en voluntariosPendientes
           if (!userDoc.exists()) {
-            userDoc = await getDoc(doc(db, "voluntariosPendientes", currentUser.uid));
+            userDoc = await getDoc(
+              doc(db, "voluntariosPendientes", currentUser.uid)
+            );
           }
 
           if (!userDoc.exists()) {
@@ -81,22 +84,22 @@ const DashboardScreen: React.FC = () => {
     }, [currentUser])
   );
 
-  const { logout } = useAuth()
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-  Alert.alert(
-    "Cerrar sesión",
-    "¿Estás seguro de que quieres cerrar sesión?",
-    [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Cerrar sesión",
-        style: "destructive",
-        onPress: logout,
-      },
-    ]
-  );
-};
+    Alert.alert(
+      "Cerrar sesión",
+      "¿Estás seguro de que quieres cerrar sesión?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Cerrar sesión",
+          style: "destructive",
+          onPress: logout,
+        },
+      ]
+    );
+  };
 
   // Pantalla de carga
   if (loading) {
@@ -182,20 +185,53 @@ const DashboardScreen: React.FC = () => {
             size={90}
             color={Colors.purple}
           />
-          <Text style={styles.name}>{userData.nombre || "Voluntario"}</Text>
 
+          <View style={{ flexDirection: "row", alignItems: "center", marginRight: -8
+           }}>
+            {/* Display the user's name */}
+            <Text style={styles.name}>{userData.nombre || "Voluntario"}</Text>
+
+            {/* A single, visible button with the correct logic */}
+            <TouchableOpacity
+              style={styles.editButton} // Apply your desired style for the button
+              onPress={() => {
+                if (isAprobado) {
+                  navigation.navigate("EditProfile");
+                } else {
+                  Alert.alert(
+                    "Pendiente",
+                    "No puedes editar tu perfil hasta que tu solicitud sea aceptada."
+                  );
+                }
+              }}
+            >
+              {/* An icon makes the button visible and easy to understand */}
+              <Ionicons name="pencil" size={18} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
           <View
             style={[styles.estadoVoluntario, { backgroundColor: estadoColor }]}
           >
-            <Text style={[styles.estado, { fontFamily: "Inter_400Regular", color: Colors.text }]}>
+            <Text
+              style={[
+                styles.estado,
+                { fontFamily: "Inter_400Regular", color: Colors.text },
+              ]}
+            >
               {estadoTexto}
             </Text>
+            <TouchableOpacity></TouchableOpacity>
           </View>
 
           <Text
             style={[
               styles.estado,
-              { fontFamily: "Inter_400Regular", marginTop: 10, fontSize: 11, color: Colors.gray },
+              {
+                fontFamily: "Inter_400Regular",
+                marginTop: 10,
+                fontSize: 11,
+                color: Colors.gray,
+              },
             ]}
           >
             ID: {currentUser?.uid?.substring(0, 8) || "..."}

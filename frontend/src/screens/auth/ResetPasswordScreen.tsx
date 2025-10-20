@@ -73,7 +73,7 @@ const ForgotPasswordScreen: React.FC = () => {
         style={styles.logo}
       />
 
-      <Text style={styles.title}>Recuperar Contraseña</Text>
+      <Text style={styles.title}>Restablecer Contraseña</Text>
       <Text style={styles.subtitle}>
         Ingresa tu correo electrónico y te enviaremos un enlace para que
         restablezcas tu contraseña.

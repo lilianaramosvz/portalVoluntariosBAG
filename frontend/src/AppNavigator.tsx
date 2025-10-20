@@ -38,8 +38,6 @@ const AppNavigator = () => {
         return <VoluntarioNavigator />;
       case "guardia":
         return <GuardiaNavigator />;
-      case "superadmin":
-        return <SuperAdminNavigator />;
       default:
         return <AuthNavigator />;
     }

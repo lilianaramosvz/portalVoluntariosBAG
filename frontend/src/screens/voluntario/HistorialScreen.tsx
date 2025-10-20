@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
@@ -112,7 +111,7 @@ export default function HistorialScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={{ flex: 1, justifyContent: "space-between", padding: 18 }}>
         <HeaderBack
           title="Historial de asistencias"
@@ -213,6 +212,6 @@ export default function HistorialScreen() {
           </>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

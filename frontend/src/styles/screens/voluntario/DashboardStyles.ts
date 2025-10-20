@@ -46,7 +46,9 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     fontSize: 18,
     marginTop: 8,
+    marginLeft: 1.5,
     textAlign: "center",
+    alignContent: "center",
     color: Colors.text,
   },
   estadoVoluntario: {
@@ -132,6 +134,28 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     marginLeft: 10,
     shadowOffset: { width: 0, height: 2 },
+  },
+  editButton: {
+    backgroundColor: Colors.lightGreen, // fondo semi-transparente
+    marginLeft: 5,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  label: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 8,
+    marginTop: 20,
+    fontWeight: "500",
+  },
+  input: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
   },
 });
 

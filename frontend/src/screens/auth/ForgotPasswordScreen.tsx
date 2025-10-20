@@ -66,7 +66,7 @@ const ForgotPasswordScreen: React.FC = () => {
         source={require("../../../assets/logo.png")}
         style={styles.logo}
       />
-      <Text style={styles.title}>Recuperar Contraseña</Text>
+      <Text style={styles.title}>Restablecer Contraseña</Text>
       <Text style={styles.subtitle}>
         Ingresa tu correo y te enviaremos un enlace para que la recuperes.
       </Text>
