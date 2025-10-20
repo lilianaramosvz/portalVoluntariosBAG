@@ -151,6 +151,23 @@ export const styles = StyleSheet.create({
     color: Colors.text,
     textAlign: "left",
   },
+  deleteButton: {
+    backgroundColor: Colors.lightRed, 
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 25,
+    marginBottom: 15,
+  },
+  deleteButtonText: {
+    color: Colors.white,
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    fontWeight: "600",
+    marginLeft: 10,
+  },
   curpText: {
     fontSize: 10,
     color: Colors.gray,

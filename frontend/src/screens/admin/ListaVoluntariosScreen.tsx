@@ -11,8 +11,7 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
-  SafeAreaView,
-  StyleSheet, 
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../styles/colors";
@@ -25,8 +24,7 @@ import {
   deleteDoc, // Se importa la función para borrar
 } from "firebase/firestore";
 import { app } from "../../services/firebaseConfig";
-// Se renombra la importación de estilos para evitar conflictos
-import { styles as externalStyles } from "../../styles/screens/admin/ListaVoluntariosStyles";
+import { styles } from "../../styles/screens/admin/ListaVoluntariosStyles";
 import { HeaderBack } from "../../components/headerTitle";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { use } from "react";
@@ -76,8 +74,12 @@ const ListaVoluntariosScreen: React.FC = () => {
       });
       voluntariosData.sort((a, b) => {
         if (a.fechaRegistro && b.fechaRegistro) {
-          const dateA = a.fechaRegistro.toDate ? a.fechaRegistro.toDate() : new Date(a.fechaRegistro);
-          const dateB = b.fechaRegistro.toDate ? b.fechaRegistro.toDate() : new Date(b.fechaRegistro);
+          const dateA = a.fechaRegistro.toDate
+            ? a.fechaRegistro.toDate()
+            : new Date(a.fechaRegistro);
+          const dateB = b.fechaRegistro.toDate
+            ? b.fechaRegistro.toDate()
+            : new Date(b.fechaRegistro);
           return dateB.getTime() - dateA.getTime();
         }
         return 0;
@@ -91,8 +93,8 @@ const ListaVoluntariosScreen: React.FC = () => {
     }
   }, []);
   useEffect(() => {
-      fetchVoluntarios();
-    }, [fetchVoluntarios]);
+    fetchVoluntarios();
+  }, [fetchVoluntarios]);
 
   const fetchVoluntarioDetails = async (voluntarioId: string) => {
     try {
@@ -100,7 +102,10 @@ const ListaVoluntariosScreen: React.FC = () => {
       const docRef = doc(db, "Usuarios", voluntarioId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setSelectedVoluntario({ id: docSnap.id, ...docSnap.data() } as Voluntario);
+        setSelectedVoluntario({
+          id: docSnap.id,
+          ...docSnap.data(),
+        } as Voluntario);
       } else {
         Alert.alert("Error", "No se encontraron los detalles del voluntario");
       }
@@ -161,7 +166,9 @@ const ListaVoluntariosScreen: React.FC = () => {
           onPress: async () => {
             try {
               await deleteDoc(doc(db, "Usuarios", volunteer.id));
-              setVoluntarios((prev) => prev.filter((v) => v.id !== volunteer.id));
+              setVoluntarios((prev) =>
+                prev.filter((v) => v.id !== volunteer.id)
+              );
               setSelectedVoluntario(null); // <-- Cierra el modal después de borrar
               Alert.alert("Éxito", `${volunteer.nombre} ha sido dado de baja.`);
             } catch (error) {
@@ -177,33 +184,40 @@ const ListaVoluntariosScreen: React.FC = () => {
   const renderContent = () => {
     if (loading) {
       return (
-        <View style={externalStyles.centeredContainer}>
+        <View style={styles.centeredContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={externalStyles.emptyText}>Cargando voluntarios...</Text>
+          <Text style={styles.emptyText}>Cargando voluntarios...</Text>
         </View>
       );
     }
 
     if (voluntarios.length === 0) {
       return (
-        <View style={externalStyles.emptyContainer}>
+        <View style={styles.emptyContainer}>
           <Ionicons name="people-outline" size={60} color={Colors.gray} />
-          <Text style={externalStyles.emptyText}>No hay voluntarios registrados</Text>
+          <Text style={styles.emptyText}>
+            No hay voluntarios registrados
+          </Text>
         </View>
       );
     }
 
     return (
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        <View style={externalStyles.mainCard}>
-          <Text style={externalStyles.mainCardTitle}>Lista de voluntarios registrados</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        <View style={styles.mainCard}>
+          <Text style={styles.mainCardTitle}>
+            Lista de voluntarios registrados
+          </Text>
           <FlatList
             data={voluntarios}
             scrollEnabled={false}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={externalStyles.form}
+                style={styles.form}
                 onPress={() => handleVoluntarioPress(item)}
                 activeOpacity={0.7}
               >
@@ -215,13 +229,23 @@ const ListaVoluntariosScreen: React.FC = () => {
                     style={{ marginRight: 10, marginLeft: -5 }}
                   />
                   <View style={{ flex: 1 }}>
-                    <Text style={externalStyles.nombreText} ellipsizeMode="tail" numberOfLines={1}>
+                    <Text
+                      style={styles.nombreText}
+                      ellipsizeMode="tail"
+                      numberOfLines={1}
+                    >
                       {item.nombre}
                     </Text>
-                    <Text style={externalStyles.emailText}>{item.email}</Text>
-                    <Text style={externalStyles.curpText}>CURP: {item.curp}</Text>
+                    <Text style={styles.emailText}>{item.email}</Text>
+                    <Text style={styles.curpText}>
+                      CURP: {item.curp}
+                    </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={Colors.gray}
+                  />
                 </View>
               </TouchableOpacity>
             )}
@@ -234,128 +258,159 @@ const ListaVoluntariosScreen: React.FC = () => {
     );
   };
 
-return (
-  <>
-    <View style={externalStyles.container}>
-      <HeaderBack
-        title="Voluntarios registrados"
-        onBack={() => navigation.goBack()}
-      />
-      <View style={externalStyles.divisorline} />
-      {renderContent()}
-    </View>
-
-    {/* Modal */}
-    <Modal
-      visible={!!selectedVoluntario}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={() => setSelectedVoluntario(null)}
-    >
-      <View style={externalStyles.modalOverlay}>
-        <View style={externalStyles.modalBox}>
-          {/* Header del Modal */}
-          <View style={externalStyles.modalHeaderRow}>
-            <Text style={[externalStyles.subtitle, { fontSize: 18 }]}>
-              Detalles del Voluntario
-            </Text>
-            <TouchableOpacity
-              onPress={() => setSelectedVoluntario(null)}
-              style={externalStyles.closeButton}
-            >
-              <Ionicons name="close" size={24} color={Colors.gray} />
-            </TouchableOpacity>
-          </View>
-
-          {loadingDetails ? (
-            <View style={externalStyles.loadingDetails}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-            </View>
-          ) : (
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Información del voluntario */}
-              <View style={{ marginBottom: 10 }}>
-                {[
-                  ["Nombre completo", selectedVoluntario?.nombre],
-                  ["Correo electrónico", selectedVoluntario?.email],
-                  ["CURP", selectedVoluntario?.curp],
-                  ["Número de INE", selectedVoluntario?.numeroIne],
-                  ["Fecha de nacimiento", formatDate(selectedVoluntario?.fechaNacimiento)],
-                  ["Género", selectedVoluntario?.genero],
-                  ["Contacto de emergencia", selectedVoluntario?.contactoEmergencia],
-                  ["Discapacidad", selectedVoluntario?.discapacidad],
-                  ["Empresa", selectedVoluntario?.empresa],
-                  ["Fecha de registro", formatDate(selectedVoluntario?.fechaRegistro)],
-                ].map(([label, value]) => (
-                  <View key={label as string} style={externalStyles.fieldRow}>
-                    <Text style={externalStyles.fieldLabel}>{label}:</Text>
-                    <Text style={externalStyles.fieldValue}>{String(value) || "No disponible"}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {/* Documentos */}
-              {(selectedVoluntario?.documentos?.ine || selectedVoluntario?.documentos?.comprobanteDomicilio) && (
-                <View>
-                  <Text style={[externalStyles.subtitle, { marginBottom: 5 }]}>Documentos:</Text>
-                  {selectedVoluntario?.documentos?.ine && (
-                    <TouchableOpacity
-                      style={externalStyles.documentRow}
-                      onPress={() => openDocument(selectedVoluntario.documentos?.ine)}
-                    >
-                      <Ionicons name="document-attach" size={20} color={Colors.primary} />
-                      <Text style={externalStyles.imageFont}>Identificación oficial (INE)</Text>
-                      <Ionicons name="eye-outline" size={18} color={Colors.gray} />
-                    </TouchableOpacity>
-                  )}
-                  {selectedVoluntario?.documentos?.comprobanteDomicilio && (
-                    <TouchableOpacity
-                      style={externalStyles.documentRowNoMargin}
-                      onPress={() => openDocument(selectedVoluntario.documentos?.comprobanteDomicilio)}
-                    >
-                      <Ionicons name="document-attach" size={20} color={Colors.primary} />
-                      <Text style={externalStyles.imageFont}>Comprobante de domicilio</Text>
-                      <Ionicons name="eye-outline" size={18} color={Colors.gray} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
-
-              {/* Botón de eliminar voluntario */}
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => selectedVoluntario && handleDeleteVolunteer(selectedVoluntario)}
-              >
-                <Ionicons name="trash-outline" size={20} color={Colors.white} />
-                <Text style={styles.deleteButtonText}>Dar de baja voluntario</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          )}
-        </View>
+  return (
+    <>
+      <View style={styles.container}>
+        <HeaderBack
+          title="Voluntarios registrados"
+          onBack={() => navigation.goBack()}
+        />
+        <View style={styles.divisorline} />
+        {renderContent()}
       </View>
-    </Modal>
-  </>
-);
-};
 
-// Estilos locales para el nuevo botón de borrar
-const styles = StyleSheet.create({
-  deleteButton: {
-    backgroundColor: Colors.lightRed, // Rojo
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginTop: 25,
-    marginBottom: 15,
-  },
-  deleteButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 10,
-  },
-});
+      {/* Modal */}
+      <Modal
+        visible={!!selectedVoluntario}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setSelectedVoluntario(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            {/* Header del Modal */}
+            <View style={styles.modalHeaderRow}>
+              <Text style={[styles.subtitle, { fontSize: 18 }]}>
+                Detalles del Voluntario
+              </Text>
+              <TouchableOpacity
+                onPress={() => setSelectedVoluntario(null)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color={Colors.gray} />
+              </TouchableOpacity>
+            </View>
+
+            {loadingDetails ? (
+              <View style={styles.loadingDetails}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+              </View>
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Información del voluntario */}
+                <View style={{ marginBottom: 10 }}>
+                  {[
+                    ["Nombre completo", selectedVoluntario?.nombre],
+                    ["Correo electrónico", selectedVoluntario?.email],
+                    ["CURP", selectedVoluntario?.curp],
+                    ["Número de INE", selectedVoluntario?.numeroIne],
+                    [
+                      "Fecha de nacimiento",
+                      formatDate(selectedVoluntario?.fechaNacimiento),
+                    ],
+                    ["Género", selectedVoluntario?.genero],
+                    [
+                      "Contacto de emergencia",
+                      selectedVoluntario?.contactoEmergencia,
+                    ],
+                    ["Discapacidad", selectedVoluntario?.discapacidad],
+                    ["Empresa", selectedVoluntario?.empresa],
+                    [
+                      "Fecha de registro",
+                      formatDate(selectedVoluntario?.fechaRegistro),
+                    ],
+                  ].map(([label, value]) => (
+                    <View key={label as string} style={styles.fieldRow}>
+                      <Text style={styles.fieldLabel}>{label}:</Text>
+                      <Text style={styles.fieldValue}>
+                        {String(value) || "No disponible"}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Documentos */}
+                {(selectedVoluntario?.documentos?.ine ||
+                  selectedVoluntario?.documentos?.comprobanteDomicilio) && (
+                  <View>
+                    <Text
+                      style={[styles.subtitle, { marginBottom: 5 }]}
+                    >
+                      Documentos:
+                    </Text>
+                    {selectedVoluntario?.documentos?.ine && (
+                      <TouchableOpacity
+                        style={styles.documentRow}
+                        onPress={() =>
+                          openDocument(selectedVoluntario.documentos?.ine)
+                        }
+                      >
+                        <Ionicons
+                          name="document-attach"
+                          size={20}
+                          color={Colors.primary}
+                        />
+                        <Text style={styles.imageFont}>
+                          Identificación oficial (INE)
+                        </Text>
+                        <Ionicons
+                          name="eye-outline"
+                          size={18}
+                          color={Colors.gray}
+                        />
+                      </TouchableOpacity>
+                    )}
+                    {selectedVoluntario?.documentos?.comprobanteDomicilio && (
+                      <TouchableOpacity
+                        style={styles.documentRowNoMargin}
+                        onPress={() =>
+                          openDocument(
+                            selectedVoluntario.documentos?.comprobanteDomicilio
+                          )
+                        }
+                      >
+                        <Ionicons
+                          name="document-attach"
+                          size={20}
+                          color={Colors.primary}
+                        />
+                        <Text style={styles.imageFont}>
+                          Comprobante de domicilio
+                        </Text>
+                        <Ionicons
+                          name="eye-outline"
+                          size={18}
+                          color={Colors.gray}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+
+                {/* Botón de eliminar voluntario */}
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() =>
+                    selectedVoluntario &&
+                    handleDeleteVolunteer(selectedVoluntario)
+                  }
+                >
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={Colors.white}
+                  />
+                  <Text style={styles.deleteButtonText}>
+                    Dar de baja voluntario
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+};
 
 export default ListaVoluntariosScreen;

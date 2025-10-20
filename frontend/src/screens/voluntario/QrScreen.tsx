@@ -100,7 +100,7 @@ const QrScreen = () => {
       <View style={styles.content}>
         {/* Header */}
         <HeaderBack
-          title="Historial de asistencias"
+          title="Código de asistencia"
           onBack={() => navigation.goBack()}
         />
         <View style={styles.divisorline} />
