@@ -10,6 +10,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
+    flex: 1,
     padding: 35,
     paddingBottom: 25,
   },
@@ -33,6 +34,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 6,
     marginBottom: 30,
+    flex: 1,
   },
   subtitle: {
     fontFamily: "Inter_600SemiBold",

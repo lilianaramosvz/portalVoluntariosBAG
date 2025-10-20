@@ -15,15 +15,30 @@ import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Colors } from "../../styles/colors";
+import { typography } from "../../styles/typography";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
 import { app } from "../../services/firebaseConfig";
-import { createUserWithEmailAndPassword, getAuth, fetchSignInMethodsForEmail, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  fetchSignInMethodsForEmail,
+  signOut,
+} from "firebase/auth";
 
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
 import { DocumentPickerAsset } from "expo-document-picker";
 import { HeaderBack } from "../../components/headerTitle";
-import { validateEmail, validatePassword, validateCURP, validateINE, validateName, validatePhone, validateDate } from "../../utils/validators";
+import {
+  validateEmail,
+  validatePassword,
+  validateCURP,
+  validateINE,
+  validateName,
+  validatePhone,
+  validateDate,
+} from "../../utils/validators";
 import { SecureErrorHandler } from "../../utils/errorHandler";
 
 type RegisterScreenProp = StackNavigationProp<RootStackParamList, "Register">;
@@ -45,84 +60,86 @@ const RegisterScreen: React.FC = () => {
   const [business, setBusiness] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [ineFile, setIneFile] = useState<DocumentPickerAsset | null>(null);
-  const [addressFile, setAddressFile] = useState<DocumentPickerAsset | null>(null);
+  const [addressFile, setAddressFile] = useState<DocumentPickerAsset | null>(
+    null
+  );
   const [isRegistering, setIsRegistering] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   const navigation = useNavigation<RegisterScreenProp>();
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     // Validar nombre
     const nameValidation = validateName(name);
     if (!nameValidation.isValid) {
-      newErrors.name = nameValidation.error || 'Nombre inválido';
+      newErrors.name = nameValidation.error || "Nombre inválido";
     }
 
     // Validar email
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      newErrors.email = emailValidation.error || 'Email inválido';
+      newErrors.email = emailValidation.error || "Email inválido";
     }
 
     // Validar CURP
     const curpValidation = validateCURP(curp);
     if (!curpValidation.isValid) {
-      newErrors.curp = curpValidation.error || 'CURP inválido';
+      newErrors.curp = curpValidation.error || "CURP inválido";
     }
 
     // Validar INE
     const ineValidation = validateINE(ine);
     if (!ineValidation.isValid) {
-      newErrors.ine = ineValidation.error || 'INE inválido';
+      newErrors.ine = ineValidation.error || "INE inválido";
     }
 
     // Validar contraseña
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.message || 'Contraseña inválida';
+      newErrors.password = passwordValidation.message || "Contraseña inválida";
     }
 
     // Validar confirmación de contraseña
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
     // Validar fecha
     const dateValidation = validateDate(birthDate);
     if (!dateValidation.isValid) {
-      newErrors.birthDate = dateValidation.error || 'Fecha inválida';
+      newErrors.birthDate = dateValidation.error || "Fecha inválida";
     }
 
     // Validar campos requeridos
     if (!emergencyContact.trim()) {
-      newErrors.emergencyContact = 'Contacto de emergencia requerido';
+      newErrors.emergencyContact = "Contacto de emergencia requerido";
     }
 
     if (!gender) {
-      newErrors.gender = 'Género requerido';
+      newErrors.gender = "Género requerido";
     }
 
     if (!discapacity.trim()) {
-      newErrors.discapacity = 'Campo requerido';
+      newErrors.discapacity = "Campo requerido";
     }
 
     if (!business.trim()) {
-      newErrors.business = 'Campo requerido';
+      newErrors.business = "Campo requerido";
     }
 
     if (!ineFile) {
-      newErrors.ineFile = 'Archivo INE requerido';
+      newErrors.ineFile = "Archivo INE requerido";
     }
 
     if (!addressFile) {
-      newErrors.addressFile = 'Comprobante de domicilio requerido';
+      newErrors.addressFile = "Comprobante de domicilio requerido";
     }
 
     if (!acceptTerms) {
-      newErrors.acceptTerms = 'Debes aceptar el aviso de privacidad';
+      newErrors.acceptTerms = "Debes aceptar el aviso de privacidad";
     }
 
     setErrors(newErrors);
@@ -131,7 +148,7 @@ const RegisterScreen: React.FC = () => {
 
   const clearFieldError = (field: string) => {
     if (errors[field]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
@@ -141,29 +158,32 @@ const RegisterScreen: React.FC = () => {
 
   const formatCURP = (text: string) => {
     // Convert to uppercase and remove non-alphanumeric characters
-    const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    
+    const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
     // Limit to 18 characters (CURP length)
     return cleaned.slice(0, 18);
   };
 
   const formatINE = (text: string) => {
     // Remove non-numeric characters
-    const cleaned = text.replace(/\D/g, '');
-    
+    const cleaned = text.replace(/\D/g, "");
+
     // Limit to 13 digits
     return cleaned.slice(0, 13);
   };
 
   const formatDate = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    
+    const cleaned = text.replace(/\D/g, "");
+
     if (cleaned.length <= 2) {
       return cleaned;
     } else if (cleaned.length <= 4) {
       return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
     } else {
-      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(
+        4,
+        8
+      )}`;
     }
   };
 
@@ -187,7 +207,6 @@ const RegisterScreen: React.FC = () => {
     setShowGenderPicker(false);
   };
 
-
   const pickIneFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: ["application/pdf", "image/*"],
@@ -207,26 +226,26 @@ const RegisterScreen: React.FC = () => {
   };
 
   const handleRegister = async () => {
-    console.log('🔵 handleRegister called');
-    
+    console.log("🔵 handleRegister called");
+
     // Usar validación mejorada
     const validation = validateForm();
-    console.log('🔵 Form validation result:', validation.isValid);
-    
+    console.log("🔵 Form validation result:", validation.isValid);
+
     if (!validation.isValid) {
-      console.log('❌ Validation failed');
-      console.log('❌ Errors:', validation.errors);
-      
+      console.log("❌ Validation failed");
+      console.log("❌ Errors:", validation.errors);
+
       // Mostrar los errores al usuario
       const errorMessages = Object.entries(validation.errors)
         .map(([field, message]) => `• ${message}`)
-        .join('\n');
-      
+        .join("\n");
+
       alert(`Por favor corrige los siguientes errores:\n\n${errorMessages}`);
       return;
     }
 
-    console.log('✅ Validation passed, starting registration');
+    console.log("✅ Validation passed, starting registration");
 
     try {
       setIsRegistering(true);
@@ -234,16 +253,26 @@ const RegisterScreen: React.FC = () => {
       // Verificar si el email ya existe
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
       if (signInMethods.length > 0) {
-        setErrors({ email: 'Este correo electrónico ya está registrado. Usa otro correo o inicia sesión.' });
+        setErrors({
+          email:
+            "Este correo electrónico ya está registrado. Usa otro correo o inicia sesión.",
+        });
         return;
       }
 
       // Crear la cuenta
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
       // Subir archivos ANTES del logout (usuario necesita estar autenticado)
-      const uploadFile = async (file: DocumentPickerAsset | null, fileName: string) => {
+      const uploadFile = async (
+        file: DocumentPickerAsset | null,
+        fileName: string
+      ) => {
         if (!file) return null;
 
         const response = await fetch(file.uri);
@@ -254,8 +283,18 @@ const RegisterScreen: React.FC = () => {
         return downloadURL;
       };
 
-      const ineFileUrl = await uploadFile(ineFile, "ine" + (ineFile ? ineFile.name.substring(ineFile.name.lastIndexOf('.')) : ''));
-      const addressFileUrl = await uploadFile(addressFile, "comprobante" + (addressFile ? addressFile.name.substring(addressFile.name.lastIndexOf('.')) : ''));
+      const ineFileUrl = await uploadFile(
+        ineFile,
+        "ine" +
+          (ineFile ? ineFile.name.substring(ineFile.name.lastIndexOf(".")) : "")
+      );
+      const addressFileUrl = await uploadFile(
+        addressFile,
+        "comprobante" +
+          (addressFile
+            ? addressFile.name.substring(addressFile.name.lastIndexOf("."))
+            : "")
+      );
 
       // Guardar datos en Firestore
       await setDoc(doc(db, "voluntariosPendientes", user.uid), {
@@ -271,30 +310,31 @@ const RegisterScreen: React.FC = () => {
         rol: "voluntario",
         fechaRegistro: new Date(),
         documentos: {
-          ine: ineFileUrl, 
-          comprobanteDomicilio: addressFileUrl, 
+          ine: ineFileUrl,
+          comprobanteDomicilio: addressFileUrl,
         },
         isActive: false, // Inactivo hasta que admin apruebe
-        estado: "pendiente"
+        estado: "pendiente",
       });
 
       // Logout DESPUÉS de subir archivos y guardar datos
       await signOut(auth);
 
-      alert("¡Registro completado con éxito! Tu cuenta está pendiente de aprobación.");
+      alert(
+        "¡Registro completado con éxito! Tu cuenta está pendiente de aprobación."
+      );
       navigation.navigate("Login");
-
     } catch (error: any) {
       console.error("Error en el registro:", error);
-      
+
       try {
         await signOut(auth);
       } catch (logoutError) {
         console.error("Error al hacer logout después de error:", logoutError);
       }
-      
+
       // Usar SecureErrorHandler para manejar errores de forma segura
-      const userMessage = SecureErrorHandler.handleAuthError(error, 'REGISTER');
+      const userMessage = SecureErrorHandler.handleAuthError(error, "REGISTER");
       alert(userMessage);
     } finally {
       setIsRegistering(false);
@@ -303,23 +343,27 @@ const RegisterScreen: React.FC = () => {
 
   if (isRegistering) {
     return (
-      <View style={{
-        flex: 1,
-        backgroundColor: "#FEFFF6",
-        justifyContent: "center",
-        alignItems: "center",
-      }}>
-        <ActivityIndicator size="large" color="#009951" />
-        <Text style={{ marginTop: 10, fontSize: 16, color: "#666" }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={{ marginTop: 10, fontSize: 16, color: Colors.text, fontFamily: "Inter_400Regular" }}>
           Registrando...
         </Text>
       </View>
     );
   }
 
-
   return (
-    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
+    <ScrollView
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.container}
+    >
       <View style={styles.container}>
         <HeaderBack
           title="Registro de voluntarios"
@@ -335,7 +379,11 @@ const RegisterScreen: React.FC = () => {
             value={name}
             onChangeText={setName}
           />
-          {errors.name && <Text style={{color: 'red', fontSize: 12, marginTop: 4}}>{errors.name}</Text>}
+          {errors.name && (
+            <Text style={{ color: "red", fontSize: 12, marginTop: 4 }}>
+              {errors.name}
+            </Text>
+          )}
 
           <Text style={styles.label}>CURP *</Text>
           <TextInput
@@ -385,8 +433,16 @@ const RegisterScreen: React.FC = () => {
           />
 
           <Text style={styles.label}>Género *</Text>
-          <TouchableOpacity style={styles.input} onPress={() => setShowGenderPicker(true)}>
-            <Text style={[styles.uploadButtonText, { color: gender ? "#000" : "#999" }]}>
+          <TouchableOpacity
+            style={styles.input}
+            onPress={() => setShowGenderPicker(true)}
+          >
+            <Text
+              style={[
+                styles.uploadButtonText,
+                { color: gender ? "#000" : "#8d8c8cff" },
+              ]}
+            >
               {gender || "Selecciona tu género"}
             </Text>
           </TouchableOpacity>
@@ -422,7 +478,9 @@ const RegisterScreen: React.FC = () => {
           <Text style={styles.label}>Comprobante de domicilio *</Text>
           <TouchableOpacity style={styles.input} onPress={pickAddressFile}>
             <Text style={styles.uploadButtonText}>
-              {addressFile ? `✅ ${addressFile.name}` : "📎   Subir comprobante"}
+              {addressFile
+                ? `✅ ${addressFile.name}`
+                : "📎   Subir comprobante"}
             </Text>
           </TouchableOpacity>
 
@@ -459,7 +517,8 @@ const RegisterScreen: React.FC = () => {
               >
                 aviso de privacidad
               </Text>{" "}
-              y autorizo el uso de mis datos personales conforme a la norma aplicable.
+              y autorizo el uso de mis datos personales conforme a la norma
+              aplicable.
             </Text>
           </View>
         </View>
@@ -482,25 +541,31 @@ const RegisterScreen: React.FC = () => {
         transparent={true}
         onRequestClose={() => setShowGenderPicker(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          justifyContent: "center",
-          alignItems: "center",
-        }}>
-          <View style={{
-            backgroundColor: "white",
-            borderRadius: 16,
-            padding: 20,
-            width: "80%",
-            maxWidth: 300,
-          }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: "600",
-              marginBottom: 20,
-              textAlign: "center",
-            }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 16,
+              padding: 20,
+              width: "80%",
+              maxWidth: 300,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                marginBottom: 20,
+                textAlign: "center",
+              }}
+            >
               Selecciona tu género
             </Text>
 
@@ -514,12 +579,15 @@ const RegisterScreen: React.FC = () => {
                 }}
                 onPress={() => selectGender(option)}
               >
-                <Text style={{
-                  fontSize: 16,
-                  textAlign: "center",
-                  color: gender === option ? "#009951" : "#333",
-                  fontWeight: gender === option ? "600" : "400",
-                }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    textAlign: "center",
+                    fontFamily: "Inter_400Regular",
+                    color: gender === option ? Colors.primary : Colors.text,
+                    fontWeight: gender === option ? "600" : "400",
+                  }}
+                >
                   {option}
                 </Text>
               </TouchableOpacity>
@@ -533,7 +601,7 @@ const RegisterScreen: React.FC = () => {
               }}
               onPress={() => setShowGenderPicker(false)}
             >
-              <Text style={{ color: "#666", fontSize: 16 }}>Cancelar</Text>
+              <Text style={{ color: Colors.text, fontSize: 16, fontFamily: "Inter_400Regular" }}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </View>
