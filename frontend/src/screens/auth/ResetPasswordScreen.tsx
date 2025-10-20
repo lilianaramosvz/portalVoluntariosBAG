@@ -1,5 +1,3 @@
-// frontend/src/screens/auth/ForgotPasswordScreen.tsx
-
 import React, { useState } from "react";
 import {
   View,
@@ -12,8 +10,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import { styles } from "../../styles/screens/auth/ForgotPasswordStyles";
 import { Ionicons } from "@expo/vector-icons";
+import { styles } from "../../styles/screens/auth/ForgotPasswordStyles";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AuthNavigator";
 
@@ -23,7 +21,7 @@ const ForgotPasswordScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handlePasswordReset = async () => {
-    if (!email) {
+    if (!email.trim()) {
       Alert.alert("Campo vacío", "Por favor, ingresa tu correo electrónico.");
       return;
     }
@@ -31,21 +29,28 @@ const ForgotPasswordScreen: React.FC = () => {
     setLoading(true);
     try {
       const auth = getAuth();
-      // Esta es la función clave de Firebase
       await sendPasswordResetEmail(auth, email);
 
       Alert.alert(
-        "Revisa tu Correo",
-        "Se ha enviado un enlace a tu correo electrónico para restablecer tu contraseña.",
+        "Revisa tu correo 📩",
+        "Te enviamos un enlace para restablecer tu contraseña.",
         [{ text: "OK", onPress: () => navigation.navigate("Login") }]
       );
     } catch (error: any) {
       console.error("Error al enviar correo de restablecimiento:", error);
-      // Maneja errores comunes para dar una mejor respuesta al usuario
-      if (error.code === 'auth/user-not-found') {
-        Alert.alert("Usuario no encontrado", "No existe una cuenta registrada con ese correo electrónico.");
+
+      if (error.code === "auth/user-not-found") {
+        Alert.alert(
+          "Usuario no encontrado",
+          "No existe una cuenta registrada con ese correo."
+        );
+      } else if (error.code === "auth/invalid-email") {
+        Alert.alert("Correo inválido", "Por favor ingresa un correo válido.");
       } else {
-        Alert.alert("Error", "No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo.");
+        Alert.alert(
+          "Error",
+          "No se pudo enviar el correo. Inténtalo de nuevo más tarde."
+        );
       }
     } finally {
       setLoading(false);
@@ -54,6 +59,7 @@ const ForgotPasswordScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* Botón de volver atrás */}
       <TouchableOpacity
         style={styles.backContainer}
         onPress={() => navigation.goBack()}
@@ -61,13 +67,16 @@ const ForgotPasswordScreen: React.FC = () => {
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
+      {/* Logo */}
       <Image
-        source={require("../../../assets/logo.png")} // Asegúrate de que la ruta del logo sea correcta
+        source={require("../../../assets/logo.png")}
         style={styles.logo}
       />
+
       <Text style={styles.title}>Recuperar Contraseña</Text>
       <Text style={styles.subtitle}>
-        Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+        Ingresa tu correo electrónico y te enviaremos un enlace para que
+        restablezcas tu contraseña.
       </Text>
 
       <Text style={styles.label}>Correo electrónico:</Text>
@@ -81,14 +90,14 @@ const ForgotPasswordScreen: React.FC = () => {
       />
 
       <TouchableOpacity
-        style={styles.registerButton}
+        style={[styles.registerButton, loading && { opacity: 0.6 }]}
         onPress={handlePasswordReset}
         disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.registerText}>Enviar Enlace</Text>
+          <Text style={styles.registerText}>Enviar enlace</Text>
         )}
       </TouchableOpacity>
     </View>

@@ -1,4 +1,4 @@
-//frontend\src\navigation\AuthNavigator.tsx
+// frontend/src/navigation/AuthNavigator.tsx
 
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -12,6 +12,7 @@ export type RootStackParamList = {
   Register: undefined;
   AvisoPrivacidad: undefined;
   ForgotPassword: undefined;
+  ResetPassword: { email: string }; 
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -23,7 +24,7 @@ const AuthNavigator = () => {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="AvisoPrivacidad" component={AvisoPrivacidadScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-    </Stack.Navigator>
+     </Stack.Navigator>
   );
 };
 

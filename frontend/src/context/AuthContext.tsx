@@ -267,3 +267,13 @@ export const useAuth = () => {
   }
   return context;
 };
+
+
+
+export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  AvisoPrivacidad: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { email: string}; 
+};
