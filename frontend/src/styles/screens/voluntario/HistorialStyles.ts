@@ -1,4 +1,4 @@
-//frontend\src\styles\screens\admin\HistorialStyles.ts
+//frontend\src\styles\screens\voluntario\HistorialStyles.ts
 
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
@@ -8,7 +8,8 @@ export const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     backgroundColor: Colors.background,
-    marginVertical: 30
+    marginVertical: 20,
+    paddingBottom: 20,
   },
   container: {
     flex: 1,
@@ -26,107 +27,111 @@ export const styles = StyleSheet.create({
   },
 
   //forms, las cajas
-    form: {
+  form: {
     backgroundColor: Colors.white,
-    borderRadius: 16,
-    elevation: 3,
+    borderRadius: 8,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
     shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    padding: 30,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 5,
+    elevation: 3,
   },
-  formDia:{
+  formDia: {
     backgroundColor: Colors.white,
-    borderRadius: 16,
+    borderRadius: 8,
     elevation: 3,
+    borderColor: Colors.lightGray,
+    borderWidth: 1,
     shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    padding: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    marginHorizontal: 5,
-    marginTop: 4
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    padding: 15,
+    marginBottom: 5,
+    marginTop: 5,
   },
   formGreen: {
-    backgroundColor: "rgba(235, 255, 238, 0.8)",
+    backgroundColor: Colors.lightGreen,
     borderRadius: 16,
     elevation: 3,
-    shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
     padding: 15,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 25,
   },
   formGray: {
     backgroundColor: Colors.lightGray,
-    borderRadius: 8,
-    padding: 15,
-    justifyContent: "center",
-    marginHorizontal: 30,
+    borderRadius: 12,
+    padding: 12,
+    justifyContent: "space-between",
     marginVertical: 5,
-    minWidth: 300
+    marginHorizontal: 8,
   },
   formEntrada: {
     backgroundColor: Colors.primary,
-    borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 12,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 70
+    minWidth: 60,
   },
 
   //textos
   titleGreen: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.green,
+    backgroundColor: "transparent",
   },
-  subtitleGreen:{
+  subtitleGreen: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
     color: Colors.primary,
-  },
-  subtitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    lineHeight: 22,
-    color: Colors.text,
+    backgroundColor: "transparent",
   },
   entrada: {
-    fontFamily: "Inter_600SemiBold", 
-    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
     color: Colors.white,
   },
   hora: {
-    fontFamily: "Inter_600SemiBold", 
-    fontSize: 18, 
-    fontWeight: "bold",
-    color: Colors.text
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
+    color: Colors.text,
   },
   number: {
+    fontSize: 24,
+    fontFamily: "Inter_600SemiBold",
+    fontWeight: "600",
     color: Colors.primary,
-    fontSize: 34,
-    fontWeight: "bold", 
-    marginBottom: 5, 
+    textAlign: "center",
+    letterSpacing: -0.5,
   },
   description: {
-    color: Colors.text, 
-    fontSize: 20, 
-  }, 
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: Colors.text,
+    textAlign: "center",
+    marginBottom: 5,
+    lineHeight: 22,
+  },
+  fecha: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: Colors.text,
+    textAlign: "justify",
+    marginBottom: 5,
+    lineHeight: 22,
+  },
   icon: {
-    color: Colors.primary
-  }, 
-    row: {
+    color: Colors.primary,
+  },
+  row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -136,5 +141,3 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
-
