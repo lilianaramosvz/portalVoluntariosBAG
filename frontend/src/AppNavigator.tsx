@@ -1,8 +1,11 @@
-//frontend\src\AppNavigator.tsx
+// frontend/src/AppNavigator.tsx
 
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from './context/AuthContext';
+
+// Import all your different navigators
 import AuthNavigator from './navigation/AuthNavigator';
 import AdminNavigator from './navigation/AdminNavigator';
 import VoluntarioNavigator from './navigation/VoluntarioNavigator';
@@ -10,36 +13,37 @@ import GuardiaNavigator from './navigation/GuardiaNavigator';
 import SuperAdminNavigator from './navigation/SuperAdminNavigator';
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth(); // This will now work correctly
 
-  // Mostrar indicador de carga mientras verificamos el estado de autenticación
+  // Show loading indicator while checking the user's session
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2E7D32" />
-        <Text style={styles.loadingText}>Verificando sesión...</Text>
       </View>
     );
   }
 
-  // Si no está logueado, mostrar AuthNavigator (Login/Register)
-  if (!user) {
-    return <AuthNavigator />;
-  }
-
-  // Si está logueado, mostrar el navigator según su rol
-  switch (user.role) {
-    case 'admin':
-      return <AdminNavigator />;
-    case 'voluntario':
-      return <VoluntarioNavigator />;
-    case 'guardia':
-      return <GuardiaNavigator />;
-    case 'superadmin':
-      return <SuperAdminNavigator />;
-    default:
+  // This is the core logic that fixes the RESET error
+  // It chooses which navigator to show based on the user state.
+  const navigatorToShow = () => {
+    if (!user) {
       return <AuthNavigator />;
-  }
+    }
+    switch (user.role) {
+      case 'admin': return <AdminNavigator />;
+      case 'voluntario': return <VoluntarioNavigator />;
+      case 'guardia': return <GuardiaNavigator />;
+      case 'superadmin': return <SuperAdminNavigator />;
+      default: return <AuthNavigator />;
+    }
+  };
+
+  return (
+      <NavigationContainer>
+          {navigatorToShow()}
+      </NavigationContainer>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -47,12 +51,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
   },
 });
 

@@ -19,6 +19,7 @@ import { HeaderLogout } from "../../components/headerTitle";
 import { Colors } from "../../styles/colors";
 import { typography } from "../../styles/typography";
 import styles from "../../styles/screens/voluntario/DashboardStyles";
+import { useAuth } from "../../context/AuthContext";
 
 type DashboardScreenProp = StackNavigationProp<any, "Dashboard">;
 
@@ -80,30 +81,22 @@ const DashboardScreen: React.FC = () => {
     }, [currentUser])
   );
 
+  const { logout } = useAuth()
+
   const handleLogout = () => {
-    Alert.alert(
-      "Cerrar sesión",
-      "¿Estás seguro de que quieres cerrar sesión?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Cerrar sesión",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await getAuth().signOut();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "Login" }],
-              });
-            } catch (error) {
-              Alert.alert("Error", "No se pudo cerrar sesión");
-            }
-          },
-        },
-      ]
-    );
-  };
+  Alert.alert(
+    "Cerrar sesión",
+    "¿Estás seguro de que quieres cerrar sesión?",
+    [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Cerrar sesión",
+        style: "destructive",
+        onPress: logout,
+      },
+    ]
+  );
+};
 
   // Pantalla de carga
   if (loading) {
@@ -209,7 +202,7 @@ const DashboardScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* VISTA 1: Si está PENDIENTE */}
+        {/* Si está PENDIENTE */}
         {!isAprobado && (
           <View style={{ marginTop: 10 }}>
             <View style={styles.avisoCard}>
