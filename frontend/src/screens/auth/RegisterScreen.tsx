@@ -282,7 +282,7 @@ const RegisterScreen: React.FC = () => {
       await signOut(auth);
 
       alert("¡Registro completado con éxito! Tu cuenta está pendiente de aprobación. Recibirás un correo cuando sea aprobada.");
-      navigation.navigate("Login");
+
 
     } catch (error: any) {
       console.error("Error en el registro:", error);

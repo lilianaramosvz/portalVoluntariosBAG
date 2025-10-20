@@ -1,5 +1,3 @@
-// backend/functions/tsconfig.json
-
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -9,22 +7,17 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
-    // --- ESTA ES LA LÍNEA QUE DEBES CORREGIR ---
-    "lib": [
-      "es2021" // Asegúrate de que "dom" NO esté aquí
-    ],
+    "lib": ["es2021"],
     "types": ["node"]
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ],
-
+  "include": ["src/**/*.ts", "index.ts"],
   "exclude": [
     "node_modules",
-    "../../node_modules", 
+    "../../node_modules",
     "../../frontend",
     "../../app",
     "**/*.spec.ts"
-  ]
+  ],
+  "rootDir": "."
 }
