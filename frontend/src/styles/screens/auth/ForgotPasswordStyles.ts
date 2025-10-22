@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     fontSize: 14,
   },
-  footer:{
+  footer: {
     fontFamily: "Inter_500Medium",
     marginTop: 25,
     fontSize: 13,

@@ -1,7 +1,14 @@
 //frontend\src\screens\guardia\DashboardGuardiaScreen.tsx
 
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { styles } from "../../styles/screens/guardia/DashboardGuardiaStyles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
@@ -49,50 +56,48 @@ const DashboardGuardiaScreen: React.FC = () => {
   const validateQR = async (token: string) => {
     setIsValidating(true);
     try {
-      // Call backend to redeem the token
+      // Llamar a la función para canjear el token
       const result = await redeemAccessToken(token);
-      
+
       if (result.success) {
         setIsValidQR(true);
-        setVolunteerName(result.volunteer?.name || 'Voluntario');
-        
-        // Show success alert
+        setVolunteerName(result.volunteer?.name || "Voluntario");
+
+        // Mostrar alerta de éxito
         Alert.alert(
-          '✅ Acceso permitido',
-          `Voluntario: ${result.volunteer?.name || 'Desconocido'}\n\nAsistencia registrada correctamente.`,
-          [{ text: 'OK' }]
+          "✅ Acceso permitido",
+          `Voluntario: ${
+            result.volunteer?.name || "Desconocido"
+          }\n\nAsistencia registrada correctamente.`,
+          [{ text: "OK" }]
         );
       }
     } catch (error: any) {
       setIsValidQR(false);
       setVolunteerName(null);
-      
-      // Parse error message
-      let errorMessage = 'Código QR inválido';
-      
-      if (error.code === 'functions/not-found') {
-        errorMessage = 'Código QR no válido';
-      } else if (error.code === 'functions/failed-precondition') {
-        if (error.message.includes('expired')) {
-          errorMessage = 'Código QR expirado';
-        } else if (error.message.includes('used')) {
-          errorMessage = 'Código QR ya fue utilizado';
-        } else if (error.message.includes('deactivated')) {
-          errorMessage = 'Código QR desactivado';
+
+      // Determinar mensaje de error específico
+      let errorMessage = "Código QR inválido";
+
+      if (error.code === "functions/not-found") {
+        errorMessage = "Código QR no válido";
+      } else if (error.code === "functions/failed-precondition") {
+        if (error.message.includes("expired")) {
+          errorMessage = "Código QR expirado";
+        } else if (error.message.includes("used")) {
+          errorMessage = "Código QR ya fue utilizado";
+        } else if (error.message.includes("deactivated")) {
+          errorMessage = "Código QR desactivado";
         }
-      } else if (error.code === 'functions/permission-denied') {
-        errorMessage = 'No tienes permiso para validar códigos QR';
+      } else if (error.code === "functions/permission-denied") {
+        errorMessage = "No tienes permiso para validar códigos QR";
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
-      Alert.alert(
-        '❌ Acceso denegado',
-        errorMessage,
-        [{ text: 'OK' }]
-      );
-      
-      console.error('[DashboardGuardia] QR validation error:', error);
+
+      Alert.alert("❌ Acceso denegado", errorMessage, [{ text: "OK" }]);
+
+      console.error("[DashboardGuardia] QR validation error:", error);
     } finally {
       setIsValidating(false);
     }
@@ -124,7 +129,7 @@ const DashboardGuardiaScreen: React.FC = () => {
 
   // Renderizar contenido del scanner/resultados
   const renderScannerContent = () => {
-    // Show camera when scanning
+    // Mostrar cámara activa
     if (isScannerActive) {
       return (
         <CameraView
@@ -135,7 +140,7 @@ const DashboardGuardiaScreen: React.FC = () => {
       );
     }
 
-    // Show loading while validating
+    // Mostrar indicador de validación
     if (isValidating) {
       return (
         <View style={styles.QRBox}>
@@ -147,16 +152,14 @@ const DashboardGuardiaScreen: React.FC = () => {
       );
     }
 
-    // Show result after validation
+    // Mostrar resultados después del escaneo
     if (scannedData && isValidQR !== null) {
       return (
         <View
           style={[
             styles.resultBox,
             {
-              backgroundColor: isValidQR
-                ? "#eefcf4ff" // verde claro
-                : "#fde2e2ff", // rojo claro
+              backgroundColor: isValidQR ? "#eefcf4ff" : "#fde2e2ff",
             },
           ]}
         >
@@ -175,7 +178,12 @@ const DashboardGuardiaScreen: React.FC = () => {
             {isValidQR ? "Acceso permitido" : "Acceso denegado"}
           </Text>
           {isValidQR && volunteerName && (
-            <Text style={[styles.resultSubText, { fontWeight: '600', marginTop: 8 }]}>
+            <Text
+              style={[
+                styles.resultSubText,
+                { fontWeight: "600", marginTop: 8 },
+              ]}
+            >
               {volunteerName}
             </Text>
           )}
@@ -186,7 +194,7 @@ const DashboardGuardiaScreen: React.FC = () => {
       );
     }
 
-    // Default state - ready to scan
+    // Mostrar ícono de cámara por defecto
     return (
       <View style={styles.QRBox}>
         <Feather name="camera" size={50} color={Colors.gray} />

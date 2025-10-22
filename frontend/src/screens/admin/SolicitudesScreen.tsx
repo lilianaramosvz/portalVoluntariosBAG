@@ -17,9 +17,6 @@ import { useNavigation } from "@react-navigation/native";
 import { HeaderBack } from "../../components/headerTitle";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { styles } from "../../styles/screens/admin/SolicitudesStyles";
-
-// Asegúrate de que firebaseConfig exporta `db` (getFirestore(app))
-// Si exporta por default, ajusta el import a: `import db from "../../services/firebaseConfig"`
 import { app } from "../../services/firebaseConfig";
 import {
   collection,
@@ -52,7 +49,7 @@ interface Voluntario {
   discapacidad?: string;
   empresa?: string;
   rol?: string;
-  role?: string; // backward compatibility
+  role?: string;
   fechaRegistro?: any;
   documentos?: {
     ine?: string;
@@ -64,7 +61,6 @@ type VoluntarioPendiente = {
   id: string;
   nombre: string;
   email: string;
-  // ...otros campos que vengan del formulario de registro
 };
 
 const PENDIENTES_COL = "voluntariosPendientes";
@@ -92,11 +88,9 @@ const SolicitudesScreen: React.FC = () => {
       id: d.id,
       nombre: data.nombre || data.name || "Sin nombre",
       email: data.email || data.correo || "Sin correo",
-      // ...propagar otros campos si se necesitan
     };
   };
 
-  // Suscripción en tiempo real
   useEffect(() => {
     const unsub = onSnapshot(
       pendientesRef,
@@ -114,7 +108,6 @@ const SolicitudesScreen: React.FC = () => {
     return () => unsub();
   }, [pendientesRef]);
 
-  // Refresh manual (pull-to-refresh)
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -183,7 +176,7 @@ const SolicitudesScreen: React.FC = () => {
                 name="down"
                 size={12}
                 color="colors.text"
-               style={{ padding: 5 }}
+                style={{ padding: 5 }}
               />
             </Text>
 
@@ -237,7 +230,6 @@ const SolicitudesScreen: React.FC = () => {
     }
   };
 
-  // Aceptar: mover doc a voluntariosRegistrados y borrar el original (batch atómico)
   const handleAceptar = useCallback(async (item: VoluntarioPendiente) => {
     try {
       setProcessingId(item.id);
@@ -253,7 +245,7 @@ const SolicitudesScreen: React.FC = () => {
       const batch = writeBatch(db);
       batch.set(dstRef, {
         ...data,
-        isActive: true, // Activar el usuario
+        isActive: true,
         estado: "aceptado",
         fechaRegistro: serverTimestamp(),
       });
@@ -264,7 +256,6 @@ const SolicitudesScreen: React.FC = () => {
         "Solicitud aceptada",
         `${item.nombre} ahora es voluntario registrado`
       );
-      // No es necesario refrescar manualmente: onSnapshot actualizará la lista.
     } catch (e) {
       console.error(e);
       Alert.alert("Error", "No se pudo aceptar la solicitud.");
@@ -273,7 +264,6 @@ const SolicitudesScreen: React.FC = () => {
     }
   }, []);
 
-  // Rechazar: eliminar doc de voluntariosPendientes
   const handleRechazar = useCallback(async (item: VoluntarioPendiente) => {
     try {
       setProcessingId(item.id);

@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginBottom: 15,
   },
-    form: {
+  form: {
     width: "100%",
     backgroundColor: Colors.white,
     padding: 25,

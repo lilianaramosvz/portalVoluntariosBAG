@@ -10,10 +10,8 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from "../../services/firebaseConfig";
-
 import { styles } from "../../styles/screens/auth/LoginStyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -33,47 +31,38 @@ const LoginScreen: React.FC = () => {
 
   const validateInputs = () => {
     let isValid = true;
-    
+
     // Validar email
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      setEmailError(emailValidation.error || 'Formato de correo inválido');
+      setEmailError(emailValidation.error || "Formato de correo inválido");
       isValid = false;
     } else {
       setEmailError("");
     }
-    
-    // Para login solo verificamos que la contraseña no esté vacía
-    // No aplicamos validación robusta porque usuarios existentes pueden tener contraseñas simples
+    // Validar contraseña
     if (!password.trim()) {
-      setPasswordError('La contraseña es requerida');
+      setPasswordError("La contraseña es requerida");
       isValid = false;
     } else {
       setPasswordError("");
     }
-    
+
     return isValid;
   };
 
-  const handleLogin = async () => { 
+  const handleLogin = async () => {
     if (!validateInputs()) {
       return;
     }
-    
     await login(email, password);
-    // El AuthContext manejará automáticamente la navegación por rol y los errores
   };
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
       <Image source={require("../../../assets/logo.png")} style={styles.logo} />
-
-      {/* Títulos */}
       <Text style={styles.title}>Banco de Alimentos de Guadalajara</Text>
       <Text style={styles.subtitle}>Portal de voluntarios</Text>
-
-      {/* Formulario */}
       <View style={styles.form}>
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput
@@ -118,7 +107,6 @@ const LoginScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </View>
-     
 
       {/* Registro */}
       <Text style={styles.newVolunteer}>¿Nuevo voluntario?</Text>

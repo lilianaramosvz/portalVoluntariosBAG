@@ -28,14 +28,11 @@ const DashboardAdminScreen: React.FC = () => {
 
       <View style={styles.containerDisplay}>
         <Text style={styles.adminTitle}>Administrador</Text>
-
-        {/* Card de bienvenida */}
         <View style={styles.card}>
           <MaterialIcons name="account-circle" size={90} color={Colors.purple} />
           <Text style={styles.welcomeText}>¡Bienvenido Admin!</Text>
         </View>
 
-        {/* Botones de navegación */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("Solicitudes")}

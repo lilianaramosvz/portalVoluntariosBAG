@@ -21,7 +21,7 @@ import {
   doc,
   getDoc,
   getFirestore,
-  deleteDoc, // Se importa la función para borrar
+  deleteDoc,
 } from "firebase/firestore";
 import { app } from "../../services/firebaseConfig";
 import { styles } from "../../styles/screens/admin/ListaVoluntariosStyles";
@@ -31,7 +31,6 @@ import { use } from "react";
 
 const db = getFirestore(app);
 
-// La interfaz de Voluntario se mantiene igual
 interface Voluntario {
   id: string;
   nombre: string;
@@ -59,8 +58,6 @@ const ListaVoluntariosScreen: React.FC = () => {
     useState<Voluntario | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState(false);
-
-  // Lógica para obtener los datos de Firebase
   const fetchVoluntarios = useCallback(async () => {
     setLoading(true);
     try {
@@ -195,9 +192,7 @@ const ListaVoluntariosScreen: React.FC = () => {
       return (
         <View style={styles.emptyContainer}>
           <Ionicons name="people-outline" size={60} color={Colors.gray} />
-          <Text style={styles.emptyText}>
-            No hay voluntarios registrados
-          </Text>
+          <Text style={styles.emptyText}>No hay voluntarios registrados</Text>
         </View>
       );
     }
@@ -237,9 +232,7 @@ const ListaVoluntariosScreen: React.FC = () => {
                       {item.nombre}
                     </Text>
                     <Text style={styles.emailText}>{item.email}</Text>
-                    <Text style={styles.curpText}>
-                      CURP: {item.curp}
-                    </Text>
+                    <Text style={styles.curpText}>CURP: {item.curp}</Text>
                   </View>
                   <Ionicons
                     name="chevron-forward"
@@ -333,9 +326,7 @@ const ListaVoluntariosScreen: React.FC = () => {
                 {(selectedVoluntario?.documentos?.ine ||
                   selectedVoluntario?.documentos?.comprobanteDomicilio) && (
                   <View>
-                    <Text
-                      style={[styles.subtitle, { marginBottom: 5 }]}
-                    >
+                    <Text style={[styles.subtitle, { marginBottom: 5 }]}>
                       Documentos:
                     </Text>
                     {selectedVoluntario?.documentos?.ine && (

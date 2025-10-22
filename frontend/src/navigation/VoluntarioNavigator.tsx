@@ -2,19 +2,16 @@
 
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-
-// 1. Importa TODAS las pantallas que usarás en este navegador
 import DashboardScreen from "../screens/voluntario/DashboardScreen";
 import QrScreen from "../screens/voluntario/QrScreen";
 import HistorialScreen from "../screens/voluntario/HistorialScreen";
 import EditProfileScreen from "../screens/voluntario/EditProfileScreen";
 import ResetPasswordScreen from "../screens/auth/ResetPasswordScreen";
 
-// 2. Define los nombres de las rutas que usarás en navigation.navigate()
 export type VoluntarioStackParamList = {
   Dashboard: undefined;
-  QR: undefined;        // <-- Coincide con navigation.navigate("QR")
-  Historial: undefined; // <-- Coincide con navigation.navigate("Historial")
+  QR: undefined;
+  Historial: undefined;
   EditProfile: undefined;
   ResetPassword: { email: string };
 };

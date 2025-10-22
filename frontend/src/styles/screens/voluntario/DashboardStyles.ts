@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
   },
   editButton: {
-    backgroundColor: Colors.lightGreen, // fondo semi-transparente
+    backgroundColor: Colors.lightGreen,
     marginLeft: 5,
     borderRadius: 8,
     justifyContent: "center",

@@ -31,22 +31,25 @@ const ForgotPasswordScreen: React.FC = () => {
     setLoading(true);
     try {
       const auth = getAuth();
-      // --- ESTA ES LA ÚNICA LÍNEA DE LÓGICA QUE NECESITAS ---
       await sendPasswordResetEmail(auth, email);
 
       Alert.alert(
         "Revisa tu Correo",
         "Se ha enviado un enlace a tu correo para restablecer la contraseña.",
-        // Al presionar OK, lo mandamos de vuelta al Login
         [{ text: "OK", onPress: () => navigation.navigate("Login") }]
       );
-
     } catch (error: any) {
       console.error("Error al enviar correo de restablecimiento:", error);
-      if (error.code === 'auth/user-not-found') {
-        Alert.alert("Usuario no encontrado", "No existe una cuenta registrada con ese correo.");
+      if (error.code === "auth/user-not-found") {
+        Alert.alert(
+          "Usuario no encontrado",
+          "No existe una cuenta registrada con ese correo."
+        );
       } else {
-        Alert.alert("Error", "No se pudo enviar el correo. Inténtalo de nuevo.");
+        Alert.alert(
+          "Error",
+          "No se pudo enviar el correo. Inténtalo de nuevo."
+        );
       }
     } finally {
       setLoading(false);
@@ -62,10 +65,7 @@ const ForgotPasswordScreen: React.FC = () => {
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
-      <Image
-        source={require("../../../assets/logo.png")}
-        style={styles.logo}
-      />
+      <Image source={require("../../../assets/logo.png")} style={styles.logo} />
       <Text style={styles.title}>Restablecer Contraseña</Text>
       <Text style={styles.subtitle}>
         Ingresa tu correo y te enviaremos un enlace para que la recuperes.

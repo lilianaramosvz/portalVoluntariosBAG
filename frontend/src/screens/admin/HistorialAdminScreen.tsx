@@ -17,7 +17,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 
-// --- Tipos ---
+
 interface Asistencia {
   id: string;
   voluntarioNombre: string;
@@ -30,7 +30,6 @@ interface AsistenciaSection {
   data: Asistencia[];
 }
 
-// --- Componente Principal ---
 const HistorialAdminScreen: React.FC = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
@@ -39,7 +38,6 @@ const HistorialAdminScreen: React.FC = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      // La lógica para obtener los datos de Firebase se mantiene igual
       const fetchAsistencias = async () => {
         try {
           setLoading(true);
@@ -127,7 +125,6 @@ const HistorialAdminScreen: React.FC = () => {
     section: AsistenciaSection;
   }) => <Text style={styles.sectionHeader}>{title}</Text>;
 
-  // Renderizado centralizado para evitar repetir el Header
   const renderContent = () => {
     if (loading) {
       return (

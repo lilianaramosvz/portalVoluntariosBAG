@@ -25,8 +25,6 @@ export const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 30,
   },
-
-  //forms, las cajas
   form: {
     backgroundColor: Colors.white,
     borderRadius: 8,
@@ -80,8 +78,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     minWidth: 60,
   },
-
-  //textos
   titleGreen: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,

@@ -40,12 +40,10 @@ export const styles = StyleSheet.create({
     color: Colors.text,
   },
   centeredContainer: {
-    // used with ActivityIndicator
     justifyContent: "center",
     alignItems: "center",
   },
   emptyContainer: {
-    // view when no volunteers
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -152,7 +150,7 @@ export const styles = StyleSheet.create({
     textAlign: "left",
   },
   deleteButton: {
-    backgroundColor: Colors.lightRed, 
+    backgroundColor: Colors.lightRed,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
