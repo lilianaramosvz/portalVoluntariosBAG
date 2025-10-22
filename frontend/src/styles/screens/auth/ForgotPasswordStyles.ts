@@ -1,4 +1,5 @@
 //frontend\src\styles\screens\auth\ForgotPasswordStyles.ts
+
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
 import { typography } from "../../typography";

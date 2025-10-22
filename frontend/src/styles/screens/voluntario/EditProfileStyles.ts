@@ -1,3 +1,5 @@
+//frontend\src\styles\screens\voluntario\EditProfileStyles.ts
+
 import { StyleSheet } from "react-native";
 import { Colors } from "../../colors";
 

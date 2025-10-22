@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import QrDisplay from "../../components/QrDisplay";
+import { Colors } from "../../styles/colors";
 import { HeaderBack } from "../../components/headerTitle";
 import { createAccessToken } from "../../services/qrFunctions";
 import styles from "../../styles/screens/voluntario/QrStyles";
@@ -24,14 +25,13 @@ const QrScreen = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [token, setToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true); // Start as true to show loading while checking auth
+  const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<number>(QR_EXPIRY_SECONDS);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
 
   const auth = getAuth();
 
-  // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -41,7 +41,6 @@ const QrScreen = () => {
     return () => unsubscribe();
   }, []);
 
-  // Timer countdown
   useEffect(() => {
     if (!expiresAt) return;
 
@@ -72,11 +71,9 @@ const QrScreen = () => {
       setExpiresAt(data.expiresAt);
       setTimeRemaining(QR_EXPIRY_SECONDS);
     } catch (error: any) {
-      // Extract the error message from Firebase error
       let message = "No se pudo generar el código QR";
 
       if (error.code === "functions/resource-exhausted") {
-        // Rate limit error - show the custom message from backend
         message = error.message;
       } else if (error.message) {
         message = error.message;
@@ -98,27 +95,24 @@ const QrScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Header */}
         <HeaderBack
           title="Código de asistencia"
           onBack={() => navigation.goBack()}
         />
         <View style={styles.divisorline} />
 
-        {/* Timer Card */}
         <View style={styles.card}>
           <Text style={styles.timerLabel}>Tiempo restante para expiración</Text>
           <Text style={styles.timerValue}>{formatTime(timeRemaining)}</Text>
         </View>
 
-        {/* QR Code Card */}
         <View style={styles.qrCard}>
           <Text style={styles.qrTitle}>Tu código de asistencia</Text>
 
           <View style={styles.qrContainer}>
             {loading && (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#009951" />
+                <ActivityIndicator size="large" color={Colors.primary} />
                 <Text style={styles.loadingText}>
                   {!authChecked
                     ? "Verificando sesión..."
@@ -151,7 +145,6 @@ const QrScreen = () => {
           </Text>
         </View>
 
-        {/* Renew Button */}
         <Pressable
           style={[styles.button, (loading || !user) && styles.buttonDisabled]}
           onPress={handleGenerateToken}
