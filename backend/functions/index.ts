@@ -13,20 +13,13 @@ const db = admin.firestore();
 // Interfaces (Para seguridad de tipos)
 interface SetRoleData {
   email: string;
-  role: "admin" | "superadmin" | "guardia" | "voluntario";
+  role: "admin" | "guardia" | "voluntario";
 }
 
 // Asigna roles personalizados a los usuarios
 export const setUserRole = onCall<SetRoleData>(async (request) => {
   const { email, role } = request.data;
-  const auth = request.auth;
 
-  if (!auth || !["admin", "superadmin"].includes(auth.token.role)) {
-    throw new HttpsError(
-      "permission-denied",
-      "Esta función solo puede ser ejecutada por un administrador."
-    );
-  }
   if (!email || !role) {
     throw new HttpsError("invalid-argument", "Se requieren 'email' y 'role'.");
   }
