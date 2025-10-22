@@ -1,3 +1,5 @@
+//frontend/src/components/QrDisplay.tsx
+
 import * as React from "react";
 import QRCode from 'react-native-qrcode-svg';
 import { View, StyleSheet } from 'react-native';

@@ -1,3 +1,5 @@
+//frontend/src/screens/auth/ForgotPasswordScreen.tsx
+
 import React, { useState } from "react";
 import {
   View,
@@ -68,10 +70,7 @@ const ForgotPasswordScreen: React.FC = () => {
       </TouchableOpacity>
 
       {/* Logo */}
-      <Image
-        source={require("../../../assets/logo.png")}
-        style={styles.logo}
-      />
+      <Image source={require("../../../assets/logo.png")} style={styles.logo} />
 
       <Text style={styles.title}>Restablecer Contraseña</Text>
       <Text style={styles.subtitle}>

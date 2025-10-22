@@ -17,7 +17,10 @@ const AvisoPrivacidadScreen: React.FC = () => {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <HeaderBack title="Aviso de privacidad" onBack={() => navigation.goBack()} />
+          <HeaderBack
+            title="Aviso de privacidad"
+            onBack={() => navigation.goBack()}
+          />
         </View>
         <View style={styles.divisorline} />
 

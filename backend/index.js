@@ -1,14 +1,13 @@
 // backend/index.js
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-// Initialize Firebase Admin once
+// Inicializa la app de Firebase Admin
 try {
   admin.initializeApp();
 } catch (e) {
-  // ignore if already initialized in emulator or tests
+  // La app ya ha sido inicializada
 }
 
-// Re-export functions implemented in src/
-exports.createAccessToken = require('./src/QrGeneration').createAccessToken;
-exports.redeemAccessToken = require('./src/QrRedemption').redeemAccessToken;
+exports.createAccessToken = require("./src/QrGeneration").createAccessToken;
+exports.redeemAccessToken = require("./src/QrRedemption").redeemAccessToken;

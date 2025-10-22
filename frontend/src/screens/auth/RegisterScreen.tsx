@@ -25,7 +25,6 @@ import {
   fetchSignInMethodsForEmail,
   signOut,
 } from "firebase/auth";
-
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
 import { DocumentPickerAsset } from "expo-document-picker";
@@ -157,18 +156,18 @@ const RegisterScreen: React.FC = () => {
   };
 
   const formatCURP = (text: string) => {
-    // Convert to uppercase and remove non-alphanumeric characters
+    // Convierte a mayúsculas y quita caracteres que no sean alfanuméricos
     const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-    // Limit to 18 characters (CURP length)
+    // Limita a 18 caracteres (CURP)
     return cleaned.slice(0, 18);
   };
 
   const formatINE = (text: string) => {
-    // Remove non-numeric characters
+    // Quita caracteres que no sean dígitos
     const cleaned = text.replace(/\D/g, "");
 
-    // Limit to 13 digits
+    // Limita a 13 caracteres (INE)
     return cleaned.slice(0, 13);
   };
 
@@ -227,16 +226,13 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegister = async () => {
     console.log("🔵 handleRegister called");
-
-    // Usar validación mejorada
     const validation = validateForm();
     console.log("🔵 Form validation result:", validation.isValid);
 
     if (!validation.isValid) {
       console.log("❌ Validation failed");
       console.log("❌ Errors:", validation.errors);
-
-      // Mostrar los errores al usuario
+      // Muestra los errores al usuario
       const errorMessages = Object.entries(validation.errors)
         .map(([field, message]) => `• ${message}`)
         .join("\n");
@@ -250,7 +246,7 @@ const RegisterScreen: React.FC = () => {
     try {
       setIsRegistering(true);
 
-      // Verificar si el email ya existe
+      // Verifica si el email ya existe
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
       if (signInMethods.length > 0) {
         setErrors({
@@ -260,7 +256,7 @@ const RegisterScreen: React.FC = () => {
         return;
       }
 
-      // Crear la cuenta
+      // Crea la cuenta
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -268,7 +264,7 @@ const RegisterScreen: React.FC = () => {
       );
       const user = userCredential.user;
 
-      // Subir archivos ANTES del logout (usuario necesita estar autenticado)
+      // Sube archivos ANTES del logout (usuario necesita estar autenticado)
       const uploadFile = async (
         file: DocumentPickerAsset | null,
         fileName: string
@@ -296,7 +292,7 @@ const RegisterScreen: React.FC = () => {
             : "")
       );
 
-      // Guardar datos en Firestore
+      // Guarda datos en Firestore
       await setDoc(doc(db, "voluntariosPendientes", user.uid), {
         nombre: name,
         curp: curp,
@@ -313,7 +309,7 @@ const RegisterScreen: React.FC = () => {
           ine: ineFileUrl,
           comprobanteDomicilio: addressFileUrl,
         },
-        isActive: false, // Inactivo hasta que admin apruebe
+        isActive: false,
         estado: "pendiente",
       });
 
@@ -333,7 +329,7 @@ const RegisterScreen: React.FC = () => {
         console.error("Error al hacer logout después de error:", logoutError);
       }
 
-      // Usar SecureErrorHandler para manejar errores de forma segura
+      // Usa SecureErrorHandler para manejar errores de forma segura
       const userMessage = SecureErrorHandler.handleAuthError(error, "REGISTER");
       alert(userMessage);
     } finally {
@@ -352,7 +348,14 @@ const RegisterScreen: React.FC = () => {
         }}
       >
         <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={{ marginTop: 10, fontSize: 16, color: Colors.text, fontFamily: "Inter_400Regular" }}>
+        <Text
+          style={{
+            marginTop: 10,
+            fontSize: 16,
+            color: Colors.text,
+            fontFamily: "Inter_400Regular",
+          }}
+        >
           Registrando...
         </Text>
       </View>
@@ -534,7 +537,7 @@ const RegisterScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Gender Picker Modal */}
+      {/* Elegir Género */}
       <Modal
         visible={showGenderPicker}
         animationType="slide"
@@ -601,7 +604,15 @@ const RegisterScreen: React.FC = () => {
               }}
               onPress={() => setShowGenderPicker(false)}
             >
-              <Text style={{ color: Colors.text, fontSize: 16, fontFamily: "Inter_400Regular" }}>Cancelar</Text>
+              <Text
+                style={{
+                  color: Colors.text,
+                  fontSize: 16,
+                  fontFamily: "Inter_400Regular",
+                }}
+              >
+                Cancelar
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -49,18 +49,14 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
-  // Encabezado de cada sección (fecha)
   sectionHeader: {
-    fontFamily: "Inter_400Regular", // Descomenta si tienes la fuente
+    fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.text, // Un color más legible que el verde
+    color: Colors.text,
     marginTop: 8,
     marginBottom: 5,
     marginLeft: 12,
   },
-
-  // Tarjeta individual de asistencia (diseño de la imagen)
   card: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -72,22 +68,18 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 2,
   },
-
-  // Contenedor del icono (círculo verde claro)
   iconContainer: {
     backgroundColor: "#0099511a",
-    borderRadius: 25, // Para hacerlo un círculo perfecto
+    borderRadius: 25,
     width: 50,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
   },
-
   infoContainer: {
     flex: 1,
   },
-
   itemName: {
     fontFamily: "Inter_700Bold",
     fontSize: 14,
@@ -95,14 +87,12 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
     lineHeight: 22,
   },
-
   itemDetails: {
     fontFamily: "Inter_300Light",
     fontSize: 11,
     color: Colors.gray,
     lineHeight: 18,
   },
-
   emptyContainer: {
     flex: 1,
     justifyContent: "center",

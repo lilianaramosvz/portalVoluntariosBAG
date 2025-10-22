@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     marginTop: 40,
     flex: 1,
   },
-  adminTitle:{
+  adminTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 22,
     color: Colors.primary,

@@ -12,19 +12,22 @@ export type RootStackParamList = {
   Register: undefined;
   AvisoPrivacidad: undefined;
   ForgotPassword: undefined;
-  ResetPassword: { email: string }; 
+  ResetPassword: { email: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AuthNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      initialRouteName="Login"
+      screenOptions={{ headerShown: false }}
+    >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="AvisoPrivacidad" component={AvisoPrivacidadScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-     </Stack.Navigator>
+    </Stack.Navigator>
   );
 };
 

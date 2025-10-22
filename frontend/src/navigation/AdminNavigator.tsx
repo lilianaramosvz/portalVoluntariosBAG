@@ -18,26 +18,17 @@ const Stack = createStackNavigator<AdminStackParamList>();
 
 const AdminNavigator = () => {
   return (
-    <Stack.Navigator 
-      initialRouteName="DashboardAdmin" 
+    <Stack.Navigator
+      initialRouteName="DashboardAdmin"
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen 
-        name="DashboardAdmin" 
-        component={DashboardAdminScreen} 
+      <Stack.Screen name="DashboardAdmin" component={DashboardAdminScreen} />
+      <Stack.Screen name="Solicitudes" component={SolicitudesScreen} />
+      <Stack.Screen
+        name="ListaVoluntarios"
+        component={ListaVoluntariosScreen}
       />
-      <Stack.Screen 
-        name="Solicitudes" 
-        component={SolicitudesScreen} 
-      />
-      <Stack.Screen 
-        name="ListaVoluntarios" 
-        component={ListaVoluntariosScreen} 
-      />
-      <Stack.Screen 
-        name="HistorialAdmin" 
-        component={HistorialAdminScreen} 
-      />
+      <Stack.Screen name="HistorialAdmin" component={HistorialAdminScreen} />
     </Stack.Navigator>
   );
 };

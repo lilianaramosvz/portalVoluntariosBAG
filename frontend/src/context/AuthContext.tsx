@@ -22,7 +22,6 @@ import { validateEmail } from "../utils/validators";
 
 type UserRole = "voluntario" | "admin" | "guardia";
 
-// --- CORRECCIÓN 1: Interfaz de Usuario Limpia y Segura ---
 interface User {
   uid: string;
   email: string;
@@ -32,7 +31,6 @@ interface User {
   contactoEmergencia?: string;
   numeroIne?: string;
   discapacidad?: string;
-  // Se eliminó 'password'. NUNCA se debe guardar la contraseña en el estado de la aplicación.
 }
 
 interface AuthContextType {
@@ -46,7 +44,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -60,19 +60,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (firebaseUser) {
           try {
             const idTokenResult = await firebaseUser.getIdTokenResult();
-            const userRole = (idTokenResult.claims.role as UserRole) || "voluntario";
-            
+            const userRole =
+              (idTokenResult.claims.role as UserRole) || "voluntario";
+
             const userDataFromDb = await getUserData(
               firebaseUser.uid,
               firebaseUser.email || undefined
             );
 
             if (userDataFromDb) {
-              // --- CORRECCIÓN 2: Usar nombres de propiedad consistentes ---
               setUser({
                 uid: firebaseUser.uid,
                 email: userDataFromDb.email,
-                nombre: userDataFromDb.name, 
+                nombre: userDataFromDb.name,
                 role: userRole,
                 isActive: userDataFromDb.isActive || true,
                 contactoEmergencia: userDataFromDb.contactoEmergencia || "",
@@ -80,15 +80,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 discapacidad: userDataFromDb.discapacidad || "",
               });
             } else {
-              // --- CORRECCIÓN 3: Fallback Lógico y Seguro ---
-              // El objeto 'firebaseUser' solo tiene datos básicos. Los campos personalizados deben ser nulos o vacíos.
               setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email || "",
                 nombre: firebaseUser.displayName || "Usuario",
                 role: userRole,
                 isActive: true,
-                // Estos campos no existen en 'firebaseUser', se inicializan vacíos.
                 contactoEmergencia: "",
                 numeroIne: "",
                 discapacidad: "",
@@ -113,17 +110,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     setLoginError(null);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const idTokenResult = await userCredential.user.getIdTokenResult();
       const userRole = (idTokenResult.claims.role as UserRole) || "voluntario";
-      const userData = await getUserData(userCredential.user.uid, userCredential.user.email || email);
+      const userData = await getUserData(
+        userCredential.user.uid,
+        userCredential.user.email || email
+      );
 
       if (userData) {
-        // --- CORRECCIÓN 4: Cargar TODOS los datos del usuario en el login ---
         setUser({
           uid: userCredential.user.uid,
           email: userData.email,
-          nombre: userData.name, 
+          nombre: userData.name,
           role: userRole,
           isActive: userData.isActive !== undefined ? userData.isActive : false,
           contactoEmergencia: userData.contactoEmergencia || "",
@@ -137,7 +140,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
     } catch (error: any) {
-      const userFriendlyError = SecureErrorHandler.handleAuthError(error, "LOGIN");
+      const userFriendlyError = SecureErrorHandler.handleAuthError(
+        error,
+        "LOGIN"
+      );
       setLoginError(userFriendlyError);
       return false;
     } finally {

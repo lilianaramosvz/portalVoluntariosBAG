@@ -16,5 +16,3 @@ export const Colors = {
   lightRed: "#f42714b8",
   lightGreen: "#ebffeeff",
 };
-
-

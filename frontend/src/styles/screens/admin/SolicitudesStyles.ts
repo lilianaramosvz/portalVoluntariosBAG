@@ -43,8 +43,6 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
     color: Colors.text,
   },
-
-  // Loading
   loadingContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -53,8 +51,6 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     color: Colors.text,
   },
-
-  // Lista
   listSeparator: {
     height: 12,
   },
@@ -65,8 +61,6 @@ export const styles = StyleSheet.create({
   emptyText: {
     color: Colors.gray,
   },
-
-  // Tarjeta de solicitud
   card: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -90,8 +84,6 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.gray,
   },
-
-  // Acciones
   actionsRow: {
     flexDirection: "row",
     gap: 12,
@@ -106,11 +98,11 @@ export const styles = StyleSheet.create({
     opacity: 0.6,
   },
   acceptButton: {
-    backgroundColor: Colors.primary, // verde
+    backgroundColor: Colors.primary,
     paddingVertical: 10,
   },
   rejectButton: {
-    backgroundColor: Colors.lightRed, // rojo
+    backgroundColor: Colors.lightRed,
     paddingVertical: 10,
   },
   actionButtonText: {
@@ -120,7 +112,6 @@ export const styles = StyleSheet.create({
   },
 
   centeredContainer: {
-    // used with ActivityIndicator
     justifyContent: "center",
     alignItems: "center",
   },
