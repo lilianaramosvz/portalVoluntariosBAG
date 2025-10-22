@@ -6,7 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { styles } from "../../styles/screens/voluntario/HistorialStyles";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { HeaderBack } from "../../components/headerTitle";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db, auth } from "../../services/firebaseConfig";
 import { Colors } from "../../styles/colors";
 
@@ -41,9 +41,13 @@ export default function HistorialScreen() {
         return;
       }
 
-      // Query para obtener las asistencias del voluntario actual
+      // Query para obtener las asistencias del voluntario actual, ordenadas por fecha
       const asistenciasRef = collection(db, "RegistroAsistencias");
-      const q = query(asistenciasRef, where("voluntarioId", "==", user.uid));
+      const q = query(
+        asistenciasRef,
+        where("voluntarioId", "==", user.uid),
+        orderBy("fecha", "desc")
+      );
 
       const querySnapshot = await getDocs(q);
       const asistencias: Asistencia[] = [];
@@ -57,11 +61,11 @@ export default function HistorialScreen() {
         });
       });
 
-      // Ordenar por fecha descendente (más reciente primero)
-      asistencias.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
-
       // Agrupar asistencias por día
       const diasMap = new Map<string, { hora: string; tipo: string }[]>();
+
+      // Set para filtrar entradas duplicadas en el mismo minuto
+      const seenTimestamps = new Set<string>();
 
       asistencias.forEach((asistencia) => {
         const fecha = asistencia.fecha;
@@ -76,6 +80,17 @@ export default function HistorialScreen() {
           hour: "2-digit",
           minute: "2-digit",
         });
+
+        // Crear una clave única para cada minuto (ej: "21/10/2025-20:57")
+        const minuteKey = `${fecha.toLocaleDateString()}-${hora}`;
+
+        // Si ya hemos visto una entrada para este minuto, la ignoramos.
+        if (seenTimestamps.has(minuteKey)) {
+          return;
+        }
+
+        // Si no la hemos visto, la agregamos al set para recordarla y la procesamos.
+        seenTimestamps.add(minuteKey);
 
         if (!diasMap.has(fechaKey)) {
           diasMap.set(fechaKey, []);
@@ -96,7 +111,8 @@ export default function HistorialScreen() {
       );
 
       setHistorial(historialArray);
-      setTotalEntradas(asistencias.length);
+      // El total de entradas ahora se basa en las entradas únicas que hemos procesado
+      setTotalEntradas(seenTimestamps.size);
       setDiasRegistrados(historialArray.length);
       setLoading(false);
     } catch (error) {

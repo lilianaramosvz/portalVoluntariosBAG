@@ -1,6 +1,6 @@
 //frontend\src\screens\guardia\DashboardGuardiaScreen.tsx
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -30,7 +30,6 @@ const DashboardGuardiaScreen: React.FC = () => {
   const navigation = useNavigation<DashboardGuardiaScreenProp>();
   const { logout } = useAuth();
 
-  // Estados del escáner
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [isValidQR, setIsValidQR] = useState<boolean | null>(null);
@@ -38,32 +37,30 @@ const DashboardGuardiaScreen: React.FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
+  const isProcessing = useRef(false);
+
   const handleLogout = () => {
     logout();
   };
 
-  // Manejar el escaneo del QR
   const handleBarcodeScanned = ({ data }: { data: string }) => {
-    if (!scannedData && !isValidating) {
-      // Evitar múltiples lecturas
-      setScannedData(data);
-      setIsScannerActive(false);
-      validateQR(data);
+    if (isProcessing.current) {
+      return;
     }
+    isProcessing.current = true;
+
+    setIsValidating(true);
+    setScannedData(data);
+    setIsScannerActive(false);
+    validateQR(data);
   };
 
-  // Validar el código QR con el backend
   const validateQR = async (token: string) => {
-    setIsValidating(true);
     try {
-      // Llamar a la función para canjear el token
       const result = await redeemAccessToken(token);
-
       if (result.success) {
         setIsValidQR(true);
         setVolunteerName(result.volunteer?.name || "Voluntario");
-
-        // Mostrar alerta de éxito
         Alert.alert(
           "✅ Acceso permitido",
           `Voluntario: ${
@@ -76,19 +73,16 @@ const DashboardGuardiaScreen: React.FC = () => {
       setIsValidQR(false);
       setVolunteerName(null);
 
-      // Determinar mensaje de error específico
       let errorMessage = "Código QR inválido";
-
       if (error.code === "functions/not-found") {
         errorMessage = "Código QR no válido";
       } else if (error.code === "functions/failed-precondition") {
-        if (error.message.includes("expired")) {
+        if (error.message.includes("expired"))
           errorMessage = "Código QR expirado";
-        } else if (error.message.includes("used")) {
+        else if (error.message.includes("used"))
           errorMessage = "Código QR ya fue utilizado";
-        } else if (error.message.includes("deactivated")) {
+        else if (error.message.includes("deactivated"))
           errorMessage = "Código QR desactivado";
-        }
       } else if (error.code === "functions/permission-denied") {
         errorMessage = "No tienes permiso para validar códigos QR";
       } else if (error.message) {
@@ -96,14 +90,11 @@ const DashboardGuardiaScreen: React.FC = () => {
       }
 
       Alert.alert("❌ Acceso denegado", errorMessage, [{ text: "OK" }]);
-
-      console.error("[DashboardGuardia] QR validation error:", error);
     } finally {
       setIsValidating(false);
     }
   };
 
-  // Iniciar escáner
   const startScanner = async () => {
     if (!permission?.granted) {
       const response = await requestPermission();
@@ -115,21 +106,20 @@ const DashboardGuardiaScreen: React.FC = () => {
         return;
       }
     }
-
     resetScanner();
     setIsScannerActive(true);
   };
 
-  // Resetear estados
   const resetScanner = () => {
     setIsScannerActive(false);
     setScannedData(null);
     setIsValidQR(null);
+    setIsValidating(false);
+    isProcessing.current = false;
   };
 
-  // Renderizar contenido del scanner/resultados
   const renderScannerContent = () => {
-    // Mostrar cámara activa
+    // Si la cámara está activa, mostrarla.
     if (isScannerActive) {
       return (
         <CameraView
@@ -140,7 +130,7 @@ const DashboardGuardiaScreen: React.FC = () => {
       );
     }
 
-    // Mostrar indicador de validación
+    // Si se está validando, mostrar SIEMPRE la pantalla de carga.
     if (isValidating) {
       return (
         <View style={styles.QRBox}>
@@ -152,15 +142,13 @@ const DashboardGuardiaScreen: React.FC = () => {
       );
     }
 
-    // Mostrar resultados después del escaneo
-    if (scannedData && isValidQR !== null) {
+    // Si no se está validando y hay datos escaneados, mostrar el resultado final.
+    if (scannedData) {
       return (
         <View
           style={[
             styles.resultBox,
-            {
-              backgroundColor: isValidQR ? "#eefcf4ff" : "#fde2e2ff",
-            },
+            { backgroundColor: isValidQR ? "#eefcf4ff" : "#fde2e2ff" },
           ]}
         >
           <MaterialIcons
@@ -187,14 +175,11 @@ const DashboardGuardiaScreen: React.FC = () => {
               {volunteerName}
             </Text>
           )}
-          <Text style={[styles.resultSubText, { fontSize: 10, marginTop: 4 }]}>
-            {scannedData}
-          </Text>
         </View>
       );
     }
 
-    // Mostrar ícono de cámara por defecto
+    //Si no ha pasado nada, mostrar el ícono de cámara por defecto.
     return (
       <View style={styles.QRBox}>
         <Feather name="camera" size={50} color={Colors.gray} />
@@ -211,7 +196,6 @@ const DashboardGuardiaScreen: React.FC = () => {
 
       <View style={styles.containerView}>
         <View style={styles.card}>
-          {/* Ícono superior */}
           <View style={styles.iconCircle}>
             <MaterialIcons
               name="qr-code-scanner"
@@ -220,16 +204,13 @@ const DashboardGuardiaScreen: React.FC = () => {
             />
           </View>
 
-          {/* Título */}
           <Text style={styles.title}>Control de acceso</Text>
           <Text style={styles.subtitle}>
             Escanea el código QR del voluntario
           </Text>
 
-          {/* Scanner Box con cámara integrada */}
           <View style={styles.scannerBox}>{renderScannerContent()}</View>
 
-          {/* Botón único */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[
@@ -248,7 +229,6 @@ const DashboardGuardiaScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Instrucciones */}
           <View style={styles.instructionsBox}>
             <Text style={styles.instructionsTitle}>Instrucciones:</Text>
             <Text style={styles.instructionsText}>

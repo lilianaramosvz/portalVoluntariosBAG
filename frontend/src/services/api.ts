@@ -44,17 +44,11 @@ export const getUserData = async (
     console.log("Referencia del documento creada:", docRef.path);
 
     let userDoc = await getDoc(docRef);
-    console.log("Documento obtenido en Usuarios, existe?:", userDoc.exists());
 
     // Si no existe en Usuarios, buscar en voluntariosPendientes
     if (!userDoc.exists()) {
-      console.log('Buscando en colección: "voluntariosPendientes"');
       const pendienteDocRef = doc(db, "voluntariosPendientes", uid);
       userDoc = await getDoc(pendienteDocRef);
-      console.log(
-        "Documento obtenido en voluntariosPendientes, existe?:",
-        userDoc.exists()
-      );
     }
 
     if (userDoc.exists()) {
@@ -92,10 +86,6 @@ export const getUserData = async (
       console.log("UserData final:", JSON.stringify(userData, null, 2));
       return userData;
     } else {
-      console.log("=== DOCUMENTO NO ENCONTRADO ===");
-      console.log(
-        `No se encontró documento con ID: "${uid}" en ninguna colección`
-      );
       return null;
     }
   } catch (error) {
@@ -113,7 +103,7 @@ export const getUserData = async (
 // Función para actualizar el rol de un usuario
 export const updateUserRole = async (
   uid: string,
-  newRole: "voluntario" | "admin" | "guardia" 
+  newRole: "voluntario" | "admin" | "guardia"
 ): Promise<void> => {
   try {
     await setDoc(doc(db, "Usuarios", uid), { rol: newRole }, { merge: true }); // Cambiado de "users" a "Usuarios"

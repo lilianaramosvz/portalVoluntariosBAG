@@ -13,7 +13,7 @@ import {
 import { styles } from "../../styles/screens/auth/RegisterStyles";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Colors } from "../../styles/colors";
 import { typography } from "../../styles/typography";
@@ -319,7 +319,12 @@ const RegisterScreen: React.FC = () => {
       alert(
         "¡Registro completado con éxito! Tu cuenta está pendiente de aprobación."
       );
-      navigation.navigate("Login");
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: "Login" }],
+        })
+      );
     } catch (error: any) {
       console.error("Error en el registro:", error);
 
