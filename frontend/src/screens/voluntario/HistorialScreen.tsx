@@ -1,12 +1,7 @@
 //frontend\src\screens\voluntario\HistorialScreen.tsx
 
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { styles } from "../../styles/screens/voluntario/HistorialStyles";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -202,7 +197,6 @@ export default function HistorialScreen() {
                   </View>
                 ))
               )}
-              {/* Última caja */}
               <View style={styles.formGreen}>
                 <Text style={styles.titleGreen}>Estadísticas</Text>
                 <Text style={styles.number}>{totalEntradas}</Text>

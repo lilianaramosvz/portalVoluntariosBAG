@@ -8,7 +8,7 @@ import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
-// ✅ Configuración de Firebase desde variables de entorno
+//Configuración de Firebase desde variables de entorno
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_AUTH_DOMAIN,
@@ -18,7 +18,7 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_APP_ID,
 };
 
-// ❌ Validación rápida de configuración
+// Validación rápida de configuración
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   console.error(
     "❌ ERROR: No se encontró configuración de Firebase.\n" +
@@ -26,17 +26,14 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   );
 }
 
-// ✅ Inicializar app
+// Inicializar app
 export const app = initializeApp(firebaseConfig);
 
-
-// ✅ Inicializar otros servicios
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "us-central1"); // ejemplo: reset password
 
-// ⚙️ App Check opcional
 /*
 export const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider("TU_CLAVE_PUBLICA_RECAPTCHA"),
@@ -44,4 +41,6 @@ export const appCheck = initializeAppCheck(app, {
 });
 */
 
-console.log("✅ Firebase inicializado correctamente para Expo Managed Workflow");
+console.log(
+  "✅ Firebase inicializado correctamente para Expo Managed Workflow"
+);

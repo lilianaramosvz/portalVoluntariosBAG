@@ -1,9 +1,10 @@
 // frontend/src/services/qrFunctions.ts
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from './firebaseConfig';
-import { getAuth } from 'firebase/auth';
 
-const functions = getFunctions(app, 'us-central1');
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { app } from "./firebaseConfig";
+import { getAuth } from "firebase/auth";
+
+const functions = getFunctions(app, "us-central1");
 
 type AccessTokenResponse = {
   tokenId: string;
@@ -23,44 +24,37 @@ type RedeemTokenResponse = {
   remainingUses: number;
 };
 
-/**
- * Creates a new QR access token for volunteer attendance
- * Backend validates user is volunteer and enforces rate limiting (4-minute cooldown)
- */
+//crea un token de acceso QR para el guardia actual
 export async function createAccessToken(): Promise<AccessTokenResponse> {
   const user = getAuth().currentUser;
   if (!user) {
-    throw new Error('Usuario no autenticado');
+    throw new Error("Usuario no autenticado");
   }
 
   const callable = httpsCallable<void, AccessTokenResponse>(
     functions,
-    'createAccessToken'
+    "createAccessToken"
   );
 
   const result = await callable();
   return result.data;
 }
 
-/**
- * Redeems (validates and marks as used) a QR access token
- * Backend validates user is guard, token exists, not expired, and not already used
- * @param token - The QR code token string scanned from volunteer's screen
- */
+//Valida y marca como usado un token de acceso QR, el backend valida que el usuario sea guardia, que exista, que no haya expirado y que no esté ya usado
+
 export async function redeemAccessToken(
   token: string
 ): Promise<RedeemTokenResponse> {
   const user = getAuth().currentUser;
   if (!user) {
-    throw new Error('Usuario no autenticado');
+    throw new Error("Usuario no autenticado");
   }
 
   const callable = httpsCallable<{ token: string }, RedeemTokenResponse>(
     functions,
-    'redeemAccessToken'
+    "redeemAccessToken"
   );
 
   const result = await callable({ token });
   return result.data;
 }
-
