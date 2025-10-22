@@ -4,8 +4,6 @@ import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { useAuth } from "./context/AuthContext";
-
-// Import all your different navigators
 import AuthNavigator from "./navigation/AuthNavigator";
 import AdminNavigator from "./navigation/AdminNavigator";
 import VoluntarioNavigator from "./navigation/VoluntarioNavigator";
@@ -14,9 +12,8 @@ import SuperAdminNavigator from "./navigation/SuperAdminNavigator";
 import { Colors } from "./styles/colors";
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth(); // This will now work correctly
+  const { user, isLoading } = useAuth();
 
-  // Show loading indicator while checking the user's session
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -25,8 +22,7 @@ const AppNavigator = () => {
     );
   }
 
-  // This is the core logic that fixes the RESET error
-  // It chooses which navigator to show based on the user state.
+  // Muestra el navegador adecuado según el rol del usuario
   const navigatorToShow = () => {
     if (!user) {
       return <AuthNavigator />;

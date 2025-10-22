@@ -174,11 +174,9 @@ const DashboardScreen: React.FC = () => {
       <HeaderLogout title="" onLogout={handleLogout} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Títulos */}
         <Text style={styles.title}>Mi perfil</Text>
         <Text style={styles.subtitle}>Banco de Alimentos - Voluntario</Text>
 
-        {/* Tarjeta del perfil */}
         <View style={styles.card}>
           <MaterialIcons
             name="account-circle"
@@ -186,14 +184,17 @@ const DashboardScreen: React.FC = () => {
             color={Colors.purple}
           />
 
-          <View style={{ flexDirection: "row", alignItems: "center", marginRight: -8
-           }}>
-            {/* Display the user's name */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginRight: -8,
+            }}
+          >
             <Text style={styles.name}>{userData.nombre || "Voluntario"}</Text>
 
-            {/* A single, visible button with the correct logic */}
             <TouchableOpacity
-              style={styles.editButton} // Apply your desired style for the button
+              style={styles.editButton}
               onPress={() => {
                 if (isAprobado) {
                   navigation.navigate("EditProfile");
@@ -205,8 +206,7 @@ const DashboardScreen: React.FC = () => {
                 }
               }}
             >
-              {/* An icon makes the button visible and easy to understand */}
-              <Ionicons name="pencil" size={18} color={Colors.primary} />
+              <Ionicons name="pencil" size={16} color={Colors.primary} />
             </TouchableOpacity>
           </View>
           <View
@@ -238,7 +238,7 @@ const DashboardScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* Si está PENDIENTE */}
+        {/*si está pendiente: */}
         {!isAprobado && (
           <View style={{ marginTop: 10 }}>
             <View style={styles.avisoCard}>
@@ -251,10 +251,9 @@ const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* VISTA 2: Si está APROBADO */}
+        {/*si está aprobado: */}
         {isAprobado && (
           <View style={{ marginTop: 16, gap: 12 }}>
-            {/* Botón Verde - Ver QR */}
             <TouchableOpacity
               style={styles.buttonQR}
               onPress={() => navigation.navigate("QR")}
@@ -263,7 +262,6 @@ const DashboardScreen: React.FC = () => {
               <Text style={styles.buttonTextQR}>Ver código QR</Text>
             </TouchableOpacity>
 
-            {/* Botón Outline - Historial */}
             <TouchableOpacity
               style={styles.button}
               onPress={() => navigation.navigate("Historial")}
@@ -274,7 +272,6 @@ const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Espaciado al final */}
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>

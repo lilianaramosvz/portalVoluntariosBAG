@@ -1,7 +1,6 @@
-/**
- * Enhanced Input Validators - OWASP MASVS-CODE-4 Compliance
- * Comprehensive input validation and sanitization
- */
+//frontend\src\utils\validators.ts
+
+// Validadores de entrada-Cumplimiento OWASP MASVS-CODE-4
 
 export interface ValidationResult {
   isValid: boolean;
@@ -10,21 +9,20 @@ export interface ValidationResult {
 }
 
 /**
- * Validate and sanitize email addresses
- * @param email - Email to validate
- * @returns Validation result with sanitized email
+ * Valida y limpia direcciones de correo electrónico
+ * @param email - Correo electrónico a validar
+ * @returns Resultado de validación con el correo limpio
  */
 export const validateEmail = (email: string): ValidationResult => {
   try {
-    // Sanitize input
     const sanitized = email.trim().toLowerCase();
 
-    // Check for empty input
+    // revisa si está vacío
     if (!sanitized) {
       return { isValid: false, error: "El email es requerido" };
     }
 
-    // Enhanced email regex with more strict validation
+    // Expresión regular de email mejorada con validación más estricta
     const emailRegex =
       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
@@ -32,12 +30,12 @@ export const validateEmail = (email: string): ValidationResult => {
       return { isValid: false, error: "Formato de email inválido" };
     }
 
-    // Check length limits (RFC 5321)
+    // Revisa los límites de longitud (RFC 5321)
     if (sanitized.length > 254) {
       return { isValid: false, error: "Email demasiado largo" };
     }
 
-    // Check for dangerous characters
+    // Revisa si hay caracteres peligrosos
     if (containsSQLInjectionPatterns(sanitized)) {
       return { isValid: false, error: "Caracteres no permitidos en email" };
     }
@@ -48,29 +46,22 @@ export const validateEmail = (email: string): ValidationResult => {
   }
 };
 
-/**
- * Legacy email validator for backward compatibility
- */
 export const validateEmailLegacy = (email: string): boolean => {
   const result = validateEmail(email);
   return result.isValid;
 };
 
-/**
- * Validate CURP (Mexican ID) with comprehensive checks
- * @param curp - CURP to validate
- * @returns Validation result
- */
+//valida la curp con base en los parámetros de México
 export const validateCURP = (curp: string): ValidationResult => {
   try {
-    // Sanitize input
+    // Saneamiento de entrada
     const sanitized = curp.trim().toUpperCase();
 
     if (!sanitized) {
       return { isValid: false, error: "El CURP es requerido" };
     }
 
-    // Basic format validation (fixed regex)
+    // Validación básica de formato
     const curpRegex = /^[A-Z]{4}\d{6}[HM][A-Z]{5}(?:\d{2}|[A-Z]\d|\d[A-Z])$/;
 
     if (!curpRegex.test(sanitized)) {
@@ -80,17 +71,17 @@ export const validateCURP = (curp: string): ValidationResult => {
       };
     }
 
-    // Validate birth date within CURP (basic validation only)
+    // validación de fecha de nacimiento dentro de la CURP
     const birthYear = parseInt(sanitized.substring(4, 6));
     const birthMonth = parseInt(sanitized.substring(6, 8));
     const birthDay = parseInt(sanitized.substring(8, 10));
 
-    // Basic date range validation
+    // Validación básica de rango de fechas
     if (birthMonth < 1 || birthMonth > 12 || birthDay < 1 || birthDay > 31) {
       return { isValid: false, error: "CURP inválido" };
     }
 
-    // Check for dangerous patterns
+    // Revisa si hay patrones peligrosos
     if (containsSQLInjectionPatterns(sanitized)) {
       return { isValid: false, error: "Caracteres no permitidos en CURP" };
     }
@@ -101,22 +92,15 @@ export const validateCURP = (curp: string): ValidationResult => {
   }
 };
 
-/**
- * Legacy CURP validator for backward compatibility
- */
 export const validateCURPLegacy = (curp: string): boolean => {
   const result = validateCURP(curp);
   return result.isValid;
 };
 
-/**
- * Validate INE (Mexican voter ID)
- * @param ine - INE to validate
- * @returns Validation result
- */
+///valida la ine con base en los parámetros de México
 export const validateINE = (ine: string): ValidationResult => {
   try {
-    // Sanitize input
+    // Saneamiento de entrada
     const sanitized = ine.replace(/\D/g, "");
 
     if (!sanitized) {
@@ -127,7 +111,7 @@ export const validateINE = (ine: string): ValidationResult => {
       return { isValid: false, error: "El INE debe tener 13 dígitos" };
     }
 
-    // Check for dangerous patterns
+    // Revisa si hay patrones peligrosos
     if (containsSQLInjectionPatterns(sanitized)) {
       return { isValid: false, error: "Caracteres no permitidos en INE" };
     }
@@ -138,34 +122,27 @@ export const validateINE = (ine: string): ValidationResult => {
   }
 };
 
-/**
- * Legacy INE validator for backward compatibility
- */
 export const validateINELegacy = (ine: string): boolean => {
   const result = validateINE(ine);
   return result.isValid;
 };
 
-/**
- * Validate Mexican phone numbers
- * @param phone - Phone number to validate
- * @returns Validation result with sanitized phone
- */
+//valida el teléfono con base en los parámetros de México
 export const validatePhone = (phone: string): ValidationResult => {
   try {
-    // Remove all non-digit characters
+    // quita caracteres no numéricos
     const sanitized = phone.replace(/\D/g, "");
 
     if (!sanitized) {
       return { isValid: false, error: "El teléfono es requerido" };
     }
 
-    // Mexican phone numbers: 10 digits
+    // verifica que sea de 10 dígitos
     if (sanitized.length !== 10) {
       return { isValid: false, error: "El teléfono debe tener 10 dígitos" };
     }
 
-    // Check for valid Mexican area codes (first 2-3 digits)
+    // Revisa si hay códigos de área mexicanos válidos (primeros 2-3 dígitos)
     const areaCode = sanitized.substring(0, 3);
     if (!isValidMexicanAreaCode(areaCode)) {
       return { isValid: false, error: "Código de área mexicano inválido" };
@@ -177,19 +154,12 @@ export const validatePhone = (phone: string): ValidationResult => {
   }
 };
 
-/**
- * Legacy phone validator for backward compatibility
- */
 export const validatePhoneLegacy = (phone: string): boolean => {
   const result = validatePhone(phone);
   return result.isValid;
 };
 
-/**
- * Enhanced password validation with security requirements
- * @param password - Password to validate
- * @returns Validation result with strength assessment
- */
+//Validación mejorada de contraseñas con requisitos de seguridad
 export const validatePassword = (
   password: string
 ): { isValid: boolean; message?: string } => {
@@ -198,7 +168,7 @@ export const validatePassword = (
       return { isValid: false, message: "La contraseña es requerida" };
     }
 
-    // Minimum length
+    // largo mínimo
     if (password.length < 8) {
       return {
         isValid: false,
@@ -206,12 +176,12 @@ export const validatePassword = (
       };
     }
 
-    // Maximum length (prevent DoS attacks)
+    // largo máximo
     if (password.length > 128) {
       return { isValid: false, message: "La contraseña es demasiado larga" };
     }
 
-    // Check for at least one uppercase letter
+    // Revisa si hay al menos una letra mayúscula
     if (!/[A-Z]/.test(password)) {
       return {
         isValid: false,
@@ -219,7 +189,7 @@ export const validatePassword = (
       };
     }
 
-    // Check for at least one lowercase letter
+    // Revisa si hay al menos una letra minúscula
     if (!/[a-z]/.test(password)) {
       return {
         isValid: false,
@@ -227,7 +197,7 @@ export const validatePassword = (
       };
     }
 
-    // Check for at least one number
+    // Revisa si hay al menos un número
     if (!/[0-9]/.test(password)) {
       return {
         isValid: false,
@@ -235,7 +205,7 @@ export const validatePassword = (
       };
     }
 
-    // Check for at least one special character
+    // Revisa si hay al menos un carácter especial
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
       return {
         isValid: false,
@@ -243,7 +213,7 @@ export const validatePassword = (
       };
     }
 
-    // Check against common passwords
+    // Revisa si hay contraseñas comunes
     if (isCommonPassword(password)) {
       return {
         isValid: false,
@@ -257,12 +227,7 @@ export const validatePassword = (
   }
 };
 
-/**
- * Validate required fields
- * @param value - Value to validate
- * @param fieldName - Name of the field for error messages
- * @returns Validation result
- */
+/// Validación de campos requeridos con saneamiento y revisión de patrones peligrosos
 export const validateRequired = (
   value: string,
   fieldName: string
@@ -274,7 +239,7 @@ export const validateRequired = (
       return { isValid: false, message: `${fieldName} es requerido` };
     }
 
-    // Check for dangerous patterns
+    // Revisa patrones peligrosos
     if (
       containsSQLInjectionPatterns(sanitized) ||
       containsXSSPatterns(sanitized)
@@ -291,21 +256,17 @@ export const validateRequired = (
   }
 };
 
-/**
- * Enhanced date validation with detailed error messages
- * @param dateString - Date string to validate (DD/MM/YYYY format)
- * @returns Validation result with specific error message
- */
+// Valida fechas con formato DD/MM/YYYY y reglas de negocio
 export const validateDate = (dateString: string): ValidationResult => {
   try {
     const sanitized = dateString.trim();
 
-    // Check if empty
+    // revisa si está vacío
     if (!sanitized) {
       return { isValid: false, error: "La fecha de nacimiento es requerida" };
     }
 
-    // Check format DD/MM/YYYY
+    // Revisa formato DD/MM/YYYY
     const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
 
     if (!dateRegex.test(sanitized)) {
@@ -317,15 +278,15 @@ export const validateDate = (dateString: string): ValidationResult => {
     const monthNum = parseInt(month);
     const yearNum = parseInt(year);
 
-    // Validate ranges
+    // Valida rangos
     if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) {
       return { isValid: false, error: "Fecha inválida" };
     }
 
-    // Create date object
+    // Crea el objeto de fecha
     const date = new Date(yearNum, monthNum - 1, dayNum);
 
-    // Validate the date components
+    // Valida los componentes de la fecha
     if (
       date.getFullYear() !== yearNum ||
       date.getMonth() !== monthNum - 1 ||
@@ -334,18 +295,18 @@ export const validateDate = (dateString: string): ValidationResult => {
       return { isValid: false, error: "Fecha inválida" };
     }
 
-    // Check if date is not in the future
+    // Revisa si la fecha no está en el futuro
     if (date > new Date()) {
       return { isValid: false, error: "Fecha inválida" };
     }
 
-    // Check reasonable year range (1900-current year)
+    // Revisa rango de años razonable (1900-año actual)
     const currentYear = new Date().getFullYear();
     if (yearNum < 1900 || yearNum > currentYear) {
       return { isValid: false, error: "Fecha inválida" };
     }
 
-    // Check minimum age (18 years old)
+    // Revisa edad mínima (18 años)
     const today = new Date();
     let age = today.getFullYear() - date.getFullYear();
     const monthDiff = today.getMonth() - date.getMonth();
@@ -368,29 +329,25 @@ export const validateDate = (dateString: string): ValidationResult => {
 };
 
 /**
- * Legacy date validator for backward compatibility
- * @deprecated Use validateDate instead for better error messages
+ * Validador de fecha heredado para compatibilidad con versiones anteriores
+ * @deprecated Usa validateDate en su lugar para obtener mensajes de error más precisos
  */
 export const validateDateLegacy = (dateString: string): boolean => {
   const result = validateDate(dateString);
   return result.isValid;
 };
 
-/**
- * Validate names (first name, last name)
- * @param name - Name to validate
- * @returns Validation result with sanitized name
- */
+// Valida nombres con saneamiento y revisión de patrones peligrosos
 export const validateName = (name: string): ValidationResult => {
   try {
-    // Sanitize input - remove extra spaces and trim
+    // Sanea la entrada - elimina espacios extra y recorta
     const sanitized = name.trim().replace(/\s+/g, " ");
 
     if (!sanitized) {
       return { isValid: false, error: "El nombre es requerido" };
     }
 
-    // Length validation
+    // Validación de longitud
     if (sanitized.length < 2) {
       return {
         isValid: false,
@@ -402,7 +359,7 @@ export const validateName = (name: string): ValidationResult => {
       return { isValid: false, error: "El nombre es demasiado largo" };
     }
 
-    // Only allow letters, spaces, and common name characters
+    // Solo permite letras, espacios y caracteres comunes en nombres
     const nameRegex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-']+$/;
 
     if (!nameRegex.test(sanitized)) {
@@ -412,7 +369,7 @@ export const validateName = (name: string): ValidationResult => {
       };
     }
 
-    // Check for dangerous patterns
+    // Revisa si hay patrones peligrosos
     if (containsSQLInjectionPatterns(sanitized)) {
       return { isValid: false, error: "Caracteres no permitidos en nombre" };
     }
@@ -423,11 +380,7 @@ export const validateName = (name: string): ValidationResult => {
   }
 };
 
-// Helper functions
-
-/**
- * Check if a date is valid
- */
+// Valida si una fecha es válida y no está en el futuro
 function isValidDate(year: number, month: number, day: number): boolean {
   const date = new Date(year, month - 1, day);
   return (
@@ -435,14 +388,12 @@ function isValidDate(year: number, month: number, day: number): boolean {
     date.getMonth() === month - 1 &&
     date.getDate() === day &&
     date <= new Date()
-  ); // Can't be in the future
+  );
 }
 
-/**
- * Check if area code is valid for Mexico
- */
+// Valida códigos de área mexicanos comunes
 function isValidMexicanAreaCode(areaCode: string): boolean {
-  // Common Mexican area codes (first 3 digits)
+  // Códigos de área mexicanos comunes (primeros 3 dígitos)
   const validCodes = [
     "222",
     "223",
@@ -451,7 +402,7 @@ function isValidMexicanAreaCode(areaCode: string): boolean {
     "226",
     "227",
     "228",
-    "229", // Puebla region
+    "229",
     "33",
     "333",
     "334",
@@ -459,12 +410,12 @@ function isValidMexicanAreaCode(areaCode: string): boolean {
     "336",
     "337",
     "338",
-    "339", // Guadalajara region
+    "339",
     "55",
     "56",
     "57",
     "58",
-    "59", // Mexico City region
+    "59",
     "81",
     "818",
     "819",
@@ -472,17 +423,15 @@ function isValidMexicanAreaCode(areaCode: string): boolean {
     "821",
     "822",
     "823",
-    "824", // Monterrey region
+    "824",
     "998",
-    "999", // Yucatan region
+    "999",
   ];
 
   return validCodes.some((code) => areaCode.startsWith(code));
 }
 
-/**
- * Check for SQL injection patterns
- */
+// Revisa patrones de inyección SQL
 function containsSQLInjectionPatterns(input: string): boolean {
   const sqlPatterns = [
     /[';|*%<>{}[\]]/i,
@@ -500,9 +449,7 @@ function containsSQLInjectionPatterns(input: string): boolean {
   return sqlPatterns.some((pattern) => pattern.test(input));
 }
 
-/**
- * Check for XSS patterns
- */
+// Revisa patrones de XSS
 function containsXSSPatterns(input: string): boolean {
   const xssPatterns = [
     /<script[^>]*>.*?<\/script>/gi,
@@ -516,9 +463,7 @@ function containsXSSPatterns(input: string): boolean {
   return xssPatterns.some((pattern) => pattern.test(input));
 }
 
-/**
- * Check against common passwords
- */
+// Revisa si la contraseña es una comúnmente usada
 function isCommonPassword(password: string): boolean {
   const commonPasswords = [
     "12345678",
