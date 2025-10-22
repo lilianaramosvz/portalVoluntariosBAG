@@ -69,6 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             );
 
             if (userDataFromDb) {
+              // Si encontramos al usuario en la base de datos, lo establecemos
               setUser({
                 uid: firebaseUser.uid,
                 email: userDataFromDb.email,
@@ -80,16 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
                 discapacidad: userDataFromDb.discapacidad || "",
               });
             } else {
-              setUser({
-                uid: firebaseUser.uid,
-                email: firebaseUser.email || "",
-                nombre: firebaseUser.displayName || "Usuario",
-                role: userRole,
-                isActive: true,
-                contactoEmergencia: "",
-                numeroIne: "",
-                discapacidad: "",
-              });
+              setUser(null);
             }
           } catch (error) {
             console.error("Error en onAuthStateChanged:", error);
